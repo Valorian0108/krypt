@@ -1,0 +1,19 @@
+# Build artifacts
+contract/target/
+target/
+**/*.rs.bk
+
+# Node (agent and UI steps)
+node_modules/
+dist/
+
+# Secrets: never committed, per house rules and hackathon rules
+.env
+.env.*
+*.seed
+*.key
+near-wallet.log
+
+# OS noise
+Thumbs.db
+.DS_Store

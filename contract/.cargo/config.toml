@@ -1,0 +1,8 @@
+# Step 0 finding (3 nov 2026): `cargo test` on this Windows machine pulls in
+# near-crypto -> aws-lc-rs -> aws-lc-sys, which wants NASM and cmake to build
+# host-side crypto assembly. Neither is installed. The clean fix is the
+# prebuilt path: aws-lc-sys then links 26 object files that ship inside the
+# checksum-verified crate itself, with no network fetch. This affects host
+# test builds only; the deployed WASM never contains this crypto.
+[env]
+AWS_LC_SYS_PREBUILT_NASM = "1"
