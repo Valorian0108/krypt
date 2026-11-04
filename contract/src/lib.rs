@@ -40,6 +40,21 @@ const CALLBACK_GAS: Gas = Gas::from_tgas(6);
 /// Hard cap on receipt bytes, so one request cannot bloat state.
 const MAX_PURPOSE_BYTES: usize = 280;
 
+// The exact sentences a decision records, defined once. request_spend
+// stores them and simulate_spend reports them, so the two paths cannot
+// drift apart in wording.
+const REASON_EXPIRED: &str =
+    "the policy has expired, so every request is refused until the owner renews it";
+const REASON_ZERO: &str = "the amount must be greater than zero";
+const REASON_ALLOWLIST: &str = "the payee is not on the owner's allowlist";
+const REASON_CAP: &str = "the amount exceeds the per-spend cap in the rules";
+const REASON_BUDGET: &str = "the period budget does not have enough left for this amount";
+const REASON_HEADROOM: &str =
+    "the vault does not hold that much spendable NEAR above its storage reserve";
+const REASON_QUEUED: &str =
+    "the amount is above the auto-settle limit, so it waits for the owner's approval";
+const REASON_SETTLED: &str = "within every rule; the payment was scheduled";
+
 pub type ReceiptId = u64;
 
 // Unique byte prefixes for each on-chain collection, so their storage
@@ -100,6 +115,19 @@ pub enum SpendStatus {
     Rejected,
 }
 
+/// The outcome of the rules ladder, before any side effect. Shared by
+/// request_spend (which records it and acts on it) and simulate_spend
+/// (which only reports it), so "what would happen" and "what did happen"
+/// are the same code path.
+enum Decision {
+    /// A rule refused it; the sentence is the reason a receipt would store.
+    Refused(&'static str),
+    /// Within every rule but above the auto-settle limit.
+    Queue,
+    /// Within every rule, including the auto-settle limit.
+    Settle,
+}
+
 /// The on-chain record of one decision. This is the product's audit trail.
 #[near(serializers = [borsh, json])]
 #[derive(Clone, Debug)]
@@ -156,6 +184,19 @@ pub struct StatusView {
     pub vault_balance_yocto: U128,
 }
 
+/// What simulate_spend reports: the decision a live request would receive,
+/// with the exact sentence a live receipt would store. `simulated` is
+/// always true and `note` repeats what was not done, so no reader can
+/// mistake this for a receipt.
+#[near(serializers = [json])]
+#[derive(Clone, Debug)]
+pub struct SimulationView {
+    pub simulated: bool,
+    pub would_be_status: SpendStatus,
+    pub would_be_reason: String,
+    pub note: String,
+}
+
 #[near(contract_state)]
 #[derive(PanicOnDefault)]
 pub struct PolicyVault {
@@ -205,12 +246,7 @@ impl PolicyVault {
     /// The only method the agent's scoped key may call. Checks the request
     /// against the rules and settles, queues, or refuses it. Every outcome
     /// writes a receipt.
-    pub fn request_spend(
-        &mut self,
-        payee: AccountId,
-        amount: U128,
-        purpose: String,
-    ) -> Receipt {
+    pub fn request_spend(&mut self, payee: AccountId, amount: U128, purpose: String) -> Receipt {
         // Authorization failures panic (no receipt): the caller has no
         // business here, and a panic leaves state untouched.
         require!(
@@ -229,112 +265,49 @@ impl PolicyVault {
         self.roll_period_if_needed();
         let amount_y = amount.0;
 
-        // Rule checks, in the order a person would explain them. Each
-        // refusal records a receipt with a readable reason and returns.
-        if self.rules.expires_at_ns != 0 && env::block_timestamp() >= self.rules.expires_at_ns {
-            return self.record(
-                payee,
-                amount_y,
-                purpose,
-                SpendStatus::Rejected,
-                "the policy has expired, so every request is refused until the owner renews it",
-            );
+        // The ladder decides; this method only records and acts. Refusals
+        // and the queue never move money; a settle debits first, then
+        // schedules the payout.
+        match self.decide(&payee, amount_y) {
+            Decision::Refused(reason) => {
+                self.record(payee, amount_y, purpose, SpendStatus::Rejected, reason)
+            }
+            Decision::Queue => {
+                // Above the auto-settle limit but within the cap: queue for
+                // the owner. Budget is deliberately not debited here; it is
+                // re-checked at approval time.
+                let receipt =
+                    self.record(payee, amount_y, purpose, SpendStatus::Queued, REASON_QUEUED);
+                self.pending.insert(
+                    receipt.id,
+                    PendingSpend {
+                        payee: receipt.payee.clone(),
+                        amount: amount_y,
+                    },
+                );
+                self.pending_order.push(receipt.id);
+                receipt
+            }
+            Decision::Settle => {
+                // Within every rule: debit the budget first, then schedule
+                // the payout. Debiting before the promise is what makes a
+                // double request impossible: the second call sees the
+                // reduced budget.
+                self.spent_this_period = self
+                    .spent_this_period
+                    .checked_add(amount_y)
+                    .expect("budget arithmetic overflowed");
+                let receipt = self.record(
+                    payee.clone(),
+                    amount_y,
+                    purpose,
+                    SpendStatus::Settled,
+                    REASON_SETTLED,
+                );
+                self.payout(payee, amount_y, receipt.id);
+                receipt
+            }
         }
-        if amount_y == 0 {
-            return self.record(
-                payee,
-                amount_y,
-                purpose,
-                SpendStatus::Rejected,
-                "the amount must be greater than zero",
-            );
-        }
-        if !self.allowlist.contains(&payee) {
-            return self.record(
-                payee,
-                amount_y,
-                purpose,
-                SpendStatus::Rejected,
-                "the payee is not on the owner's allowlist",
-            );
-        }
-        if amount_y > self.rules.cap_per_spend.0 {
-            return self.record(
-                payee,
-                amount_y,
-                purpose,
-                SpendStatus::Rejected,
-                "the amount exceeds the per-spend cap in the rules",
-            );
-        }
-        let remaining = self.rules.budget_per_period.0.saturating_sub(self.spent_this_period);
-        if amount_y > remaining {
-            return self.record(
-                payee,
-                amount_y,
-                purpose,
-                SpendStatus::Rejected,
-                "the period budget does not have enough left for this amount",
-            );
-        }
-        // Compare against the spendable balance, not the total. The protocol
-        // locks the vault's storage reserve (its state size times the
-        // per-byte price), so a transfer that would dip into it dies at the
-        // network with a raw storage error instead of a readable receipt.
-        // Found by the Step 3 live run: the contract code itself stakes most
-        // of the vault's balance, and a queued spend then failed at approval
-        // with a network error the receipt table could not explain.
-        let spendable = env::account_balance()
-            .as_yoctonear()
-            .saturating_sub(storage_reserved());
-        if amount_y > spendable {
-            return self.record(
-                payee,
-                amount_y,
-                purpose,
-                SpendStatus::Rejected,
-                "the vault does not hold that much spendable NEAR above its storage reserve",
-            );
-        }
-
-        if amount_y > self.rules.auto_limit.0 {
-            // Above the auto-settle limit but within the cap: queue for the
-            // owner. Budget is deliberately not debited here; it is
-            // re-checked at approval time.
-            let receipt = self.record(
-                payee,
-                amount_y,
-                purpose,
-                SpendStatus::Queued,
-                "the amount is above the auto-settle limit, so it waits for the owner's approval",
-            );
-            self.pending.insert(
-                receipt.id,
-                PendingSpend {
-                    payee: receipt.payee.clone(),
-                    amount: amount_y,
-                },
-            );
-            self.pending_order.push(receipt.id);
-            return receipt;
-        }
-
-        // Within every rule: debit the budget first, then schedule the
-        // payout. Debiting before the promise is what makes a double
-        // request impossible: the second call sees the reduced budget.
-        self.spent_this_period = self
-            .spent_this_period
-            .checked_add(amount_y)
-            .expect("budget arithmetic overflowed");
-        let receipt = self.record(
-            payee.clone(),
-            amount_y,
-            purpose,
-            SpendStatus::Settled,
-            "within every rule; the payment was scheduled",
-        );
-        self.payout(payee, amount_y, receipt.id);
-        receipt
     }
 
     // ------------------------------------------------------------------
@@ -345,7 +318,10 @@ impl PolicyVault {
     #[payable]
     pub fn set_rules(&mut self, rules: Rules) {
         self.assert_owner_one_yocto();
-        require!(rules.period_ns > 0, "the period length must be greater than zero");
+        require!(
+            rules.period_ns > 0,
+            "the period length must be greater than zero"
+        );
         require!(
             rules.auto_limit.0 <= rules.cap_per_spend.0,
             "the auto-settle limit must not exceed the per-spend cap"
@@ -405,7 +381,11 @@ impl PolicyVault {
             self.rules.expires_at_ns == 0 || env::block_timestamp() < self.rules.expires_at_ns,
             "the policy has expired, so nothing can be approved"
         );
-        let remaining = self.rules.budget_per_period.0.saturating_sub(self.spent_this_period);
+        let remaining = self
+            .rules
+            .budget_per_period
+            .0
+            .saturating_sub(self.spent_this_period);
         require!(
             pending.amount <= remaining,
             "the period budget ran out before this approval, so it cannot be paid"
@@ -500,9 +480,15 @@ impl PolicyVault {
                         "the owner approved this spend; the payment reached the payee",
                     );
                 } else {
-                    self.update_receipt(receipt_id, SpendStatus::Settled, "the payment reached the payee");
+                    self.update_receipt(
+                        receipt_id,
+                        SpendStatus::Settled,
+                        "the payment reached the payee",
+                    );
                 }
-                env::log_str(&format!("receipt {receipt_id}: the payment reached the payee"));
+                env::log_str(&format!(
+                    "receipt {receipt_id}: the payment reached the payee"
+                ));
             }
             Err(_) => {
                 // Restore the budget. saturating_sub: if the period rolled
@@ -558,8 +544,47 @@ impl PolicyVault {
         let cap = limit.unwrap_or(50).min(self.receipts.len());
         let len = self.receipts.len();
         (0..cap)
-            .map(|i| self.receipts.get(len - 1 - i).cloned().expect("index in range"))
+            .map(|i| {
+                self.receipts
+                    .get(len - 1 - i)
+                    .cloned()
+                    .expect("index in range")
+            })
             .collect()
+    }
+
+    /// Read-only: run the same rules ladder as request_spend against the
+    /// current state and report what it would do. Writes nothing, queues
+    /// nothing, reserves no budget, and schedules no payment.
+    ///
+    /// Deliberately open to any caller, with no key and no balance: it
+    /// changes nothing, so a judge can exercise the policy directly. Caller
+    /// identity is an authorization gate on the mutating path, not part of
+    /// the policy ladder, so it is not checked here.
+    pub fn simulate_spend(
+        &self,
+        payee: AccountId,
+        amount: U128,
+        purpose: String,
+    ) -> SimulationView {
+        // Same input validation as the live path: a purpose a live request
+        // would panic on is not a decision the ladder can answer.
+        require!(
+            !purpose.is_empty() && purpose.len() <= MAX_PURPOSE_BYTES,
+            "purpose must be between 1 and 280 bytes"
+        );
+        let (would_be_status, would_be_reason) = match self.decide(&payee, amount.0) {
+            Decision::Refused(reason) => (SpendStatus::Rejected, reason),
+            Decision::Queue => (SpendStatus::Queued, REASON_QUEUED),
+            Decision::Settle => (SpendStatus::Settled, REASON_SETTLED),
+        };
+        SimulationView {
+            simulated: true,
+            would_be_status,
+            would_be_reason: would_be_reason.to_string(),
+            note: "nothing was recorded, queued, or paid; this is the decision a live request would receive"
+                .to_string(),
+        }
     }
 
     pub fn get_pending(&self) -> Vec<PendingView> {
@@ -609,6 +634,47 @@ impl PolicyVault {
         }
     }
 
+    /// The rules ladder, in the order a person would explain it, with no
+    /// side effects. request_spend records and acts on the result;
+    /// simulate_spend only reports it. Uses the effective period, so a
+    /// view sees the same fresh-period budget that a live call would get.
+    fn decide(&self, payee: &AccountId, amount_y: u128) -> Decision {
+        if self.rules.expires_at_ns != 0 && env::block_timestamp() >= self.rules.expires_at_ns {
+            return Decision::Refused(REASON_EXPIRED);
+        }
+        if amount_y == 0 {
+            return Decision::Refused(REASON_ZERO);
+        }
+        if !self.allowlist.contains(payee) {
+            return Decision::Refused(REASON_ALLOWLIST);
+        }
+        if amount_y > self.rules.cap_per_spend.0 {
+            return Decision::Refused(REASON_CAP);
+        }
+        let (spent, _) = self.effective_period();
+        let remaining = self.rules.budget_per_period.0.saturating_sub(spent);
+        if amount_y > remaining {
+            return Decision::Refused(REASON_BUDGET);
+        }
+        // Compare against the spendable balance, not the total. The protocol
+        // locks the vault's storage reserve (its state size times the
+        // per-byte price), so a transfer that would dip into it dies at the
+        // network with a raw storage error instead of a readable receipt.
+        // Found by the Step 3 live run: the contract code itself stakes most
+        // of the vault's balance, and a queued spend then failed at approval
+        // with a network error the receipt table could not explain.
+        let spendable = env::account_balance()
+            .as_yoctonear()
+            .saturating_sub(storage_reserved());
+        if amount_y > spendable {
+            return Decision::Refused(REASON_HEADROOM);
+        }
+        if amount_y > self.rules.auto_limit.0 {
+            return Decision::Queue;
+        }
+        Decision::Settle
+    }
+
     fn pending_ids(&self) -> Vec<ReceiptId> {
         self.pending_order
             .iter()
@@ -637,10 +703,7 @@ impl PolicyVault {
             status,
             reason: reason.to_string(),
         };
-        env::log_str(&format!(
-            "receipt {id} {:?}: {reason}",
-            receipt.status
-        ));
+        env::log_str(&format!("receipt {id} {:?}: {reason}", receipt.status));
         self.receipts.push(receipt.clone());
         receipt
     }
@@ -664,9 +727,11 @@ impl PolicyVault {
         let transfer_idx = env::promise_batch_create(&payee);
         env::promise_batch_action_transfer(transfer_idx, NearToken::from_yoctonear(amount_y));
         let callback_idx = env::promise_batch_then(transfer_idx, &env::current_account_id());
-        let args =
-            near_sdk::serde_json::to_vec(&CallbackArgs { amount: U128(amount_y), receipt_id })
-                .expect("callback arguments must serialize");
+        let args = near_sdk::serde_json::to_vec(&CallbackArgs {
+            amount: U128(amount_y),
+            receipt_id,
+        })
+        .expect("callback arguments must serialize");
         env::promise_batch_action_function_call(
             callback_idx,
             "on_transfer_result",
@@ -1112,7 +1177,10 @@ mod tests {
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
             c.request_spend(good(), U128(NEAR / 10), "x".repeat(10_000));
         }));
-        assert!(result.is_err(), "oversized purpose must panic before recording");
+        assert!(
+            result.is_err(),
+            "oversized purpose must panic before recording"
+        );
         assert_eq!(status_of(&c, T0).receipts_count, 0);
     }
 
@@ -1209,7 +1277,163 @@ mod tests {
         assert_eq!(receipts[2].id, 0);
         assert_eq!(receipts[2].status, SpendStatus::Settled);
         for r in &receipts {
-            assert!(!r.reason.is_empty(), "every receipt carries a readable reason");
+            assert!(
+                !r.reason.is_empty(),
+                "every receipt carries a readable reason"
+            );
         }
+    }
+
+    // ------------------------------------------------------------------
+    // The simulation view (Step 7): same ladder, no side effects
+    // ------------------------------------------------------------------
+
+    /// Ask the view what a request would do, in the agent's context.
+    fn simulate(c: &PolicyVault, payee: AccountId, amount: u128, now: u64) -> SimulationView {
+        set_env(&agent(), 0, now);
+        c.simulate_spend(payee, U128(amount), "test purpose".to_string())
+    }
+
+    /// The view must report exactly what a live request then records:
+    /// same status, same sentence. Simulate first (it changes nothing),
+    /// then let the live call run on the same state.
+    fn assert_simulation_matches_live(
+        c: &mut PolicyVault,
+        payee: AccountId,
+        amount: u128,
+        now: u64,
+    ) {
+        let s = simulate(c, payee.clone(), amount, now);
+        let r = agent_ask(c, payee, amount, now);
+        assert_eq!(s.would_be_status, r.status, "status drift");
+        assert_eq!(s.would_be_reason, r.reason, "reason drift");
+        assert!(s.simulated);
+        assert!(!s.note.is_empty());
+    }
+
+    // One vault per test: near-sdk's mocked storage persists for the whole
+    // test thread, so two fresh PolicyVault::new calls in one test would
+    // share storage keys and collide on the allowlist. Each #[test] runs in
+    // its own thread, which is the isolation boundary the existing suite
+    // already relies on.
+
+    #[test]
+    fn simulation_matches_live_settled() {
+        assert_simulation_matches_live(&mut setup(), good(), 4 * NEAR / 10, T0);
+    }
+
+    #[test]
+    fn simulation_matches_live_queued() {
+        // Above the auto-limit, within the cap.
+        assert_simulation_matches_live(&mut setup(), good(), 8 * NEAR / 10, T0);
+    }
+
+    #[test]
+    fn simulation_matches_live_zero() {
+        assert_simulation_matches_live(&mut setup(), good(), 0, T0);
+    }
+
+    #[test]
+    fn simulation_matches_live_allowlist() {
+        assert_simulation_matches_live(&mut setup(), evil(), NEAR / 10, T0);
+    }
+
+    #[test]
+    fn simulation_matches_live_cap() {
+        assert_simulation_matches_live(&mut setup(), good(), 15 * NEAR / 10, T0);
+    }
+
+    #[test]
+    fn simulation_matches_live_budget() {
+        // Budget 0.1, request 0.2: over the remaining budget, below the cap
+        // and the auto-limit, so the budget check is the effective one.
+        owner_env(T0);
+        let mut c = PolicyVault::new(owner());
+        c.set_rules(Rules {
+            budget_per_period: U128(NEAR / 10),
+            ..normal_rules()
+        });
+        c.add_payee(good());
+        c.register_agent(agent());
+        assert_simulation_matches_live(&mut c, good(), 2 * NEAR / 10, T0);
+    }
+
+    #[test]
+    fn simulation_matches_live_expired() {
+        let mut c = setup();
+        owner_env(T0);
+        c.set_rules(Rules {
+            expires_at_ns: T0 + 10 * NS,
+            ..normal_rules()
+        });
+        assert_simulation_matches_live(&mut c, good(), NEAR / 10, T0 + 11 * NS);
+    }
+
+    #[test]
+    fn simulation_matches_the_live_headroom_refusal() {
+        // Balance 1 NEAR, storage 95,000 bytes => spendable 0.05 NEAR, so
+        // a 0.4 request must be refused for the reserve, in the view and in
+        // the live path, with the same sentence.
+        let mut c = setup();
+        let mut b = VMContextBuilder::new();
+        b.current_account_id(vault())
+            .predecessor_account_id(agent())
+            .signer_account_id(agent())
+            .attached_deposit(NearToken::from_yoctonear(0))
+            .block_timestamp(T0)
+            .account_balance(NearToken::from_near(1))
+            .storage_usage(95_000);
+        testing_env!(b.build());
+        let s = c.simulate_spend(good(), U128(4 * NEAR / 10), "test purpose".to_string());
+        let r = c.request_spend(good(), U128(4 * NEAR / 10), "test purpose".to_string());
+        assert_eq!(s.would_be_status, SpendStatus::Rejected);
+        assert_eq!(s.would_be_status, r.status);
+        assert_eq!(s.would_be_reason, r.reason);
+        assert!(s.would_be_reason.contains("storage reserve"));
+    }
+
+    #[test]
+    fn simulation_writes_and_debits_nothing() {
+        let c = setup();
+        // A would-queue request must not create a pending entry.
+        let queued = simulate(&c, good(), 8 * NEAR / 10, T0);
+        assert_eq!(queued.would_be_status, SpendStatus::Queued);
+        let s = status_of(&c, T0);
+        assert_eq!(s.receipts_count, 0);
+        assert_eq!(s.pending_count, 0);
+        assert_eq!(s.spent_this_period.0, 0);
+        // A would-settle request must not debit the budget either.
+        let settled = simulate(&c, good(), NEAR / 10, T0);
+        assert_eq!(settled.would_be_status, SpendStatus::Settled);
+        let s = status_of(&c, T0);
+        assert_eq!(s.receipts_count, 0);
+        assert_eq!(s.pending_count, 0);
+        assert_eq!(s.spent_this_period.0, 0);
+    }
+
+    #[test]
+    fn simulation_is_open_to_a_caller_with_no_key_or_balance() {
+        // The point of the view: a judge can ask the policy directly.
+        let c = setup();
+        set_env(&intruder(), 0, T0);
+        let s = c.simulate_spend(good(), U128(NEAR / 10), "judge probe".to_string());
+        assert_eq!(s.would_be_status, SpendStatus::Settled);
+        assert!(s.simulated);
+    }
+
+    #[test]
+    #[should_panic(expected = "purpose must be between 1 and 280 bytes")]
+    fn simulation_refuses_an_empty_purpose() {
+        let c = setup();
+        set_env(&agent(), 0, T0);
+        c.simulate_spend(good(), U128(NEAR / 10), String::new());
+    }
+
+    #[test]
+    #[should_panic(expected = "purpose must be between 1 and 280 bytes")]
+    fn simulation_refuses_an_oversized_purpose() {
+        let c = setup();
+        set_env(&agent(), 0, T0);
+        c.simulate_spend(good(), U128(NEAR / 10), "x".repeat(MAX_PURPOSE_BYTES + 1));
     }
 }
