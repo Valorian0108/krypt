@@ -90,7 +90,9 @@ pub enum SpendStatus {
     TransferFailed,
     /// Above the auto-settle limit, waiting for the owner.
     Queued,
-    /// The owner approved; the transfer was scheduled.
+    /// The owner approved. Kept as the terminal status when the approved
+    /// payout lands, so the receipt table always shows which spends a human
+    /// approved; the reason tells whether the payment reached the payee.
     OwnerApproved,
     /// The owner refused.
     OwnerRefused,
@@ -275,13 +277,23 @@ impl PolicyVault {
                 "the period budget does not have enough left for this amount",
             );
         }
-        if NearToken::from_yoctonear(amount_y) > env::account_balance() {
+        // Compare against the spendable balance, not the total. The protocol
+        // locks the vault's storage reserve (its state size times the
+        // per-byte price), so a transfer that would dip into it dies at the
+        // network with a raw storage error instead of a readable receipt.
+        // Found by the Step 3 live run: the contract code itself stakes most
+        // of the vault's balance, and a queued spend then failed at approval
+        // with a network error the receipt table could not explain.
+        let spendable = env::account_balance()
+            .as_yoctonear()
+            .saturating_sub(storage_reserved());
+        if amount_y > spendable {
             return self.record(
                 payee,
                 amount_y,
                 purpose,
                 SpendStatus::Rejected,
-                "the vault does not hold that much NEAR",
+                "the vault does not hold that much spendable NEAR above its storage reserve",
             );
         }
 
@@ -398,9 +410,16 @@ impl PolicyVault {
             pending.amount <= remaining,
             "the period budget ran out before this approval, so it cannot be paid"
         );
+        // Re-checked at approval time, same reason as in request_spend: the
+        // headroom may have shrunk between queueing and approval, and a
+        // payout into the storage reserve would fail at the network after
+        // the owner already signed.
+        let spendable = env::account_balance()
+            .as_yoctonear()
+            .saturating_sub(storage_reserved());
         require!(
-            NearToken::from_yoctonear(pending.amount) <= env::account_balance(),
-            "the vault does not hold that much NEAR"
+            pending.amount <= spendable,
+            "the vault does not hold that much spendable NEAR above its storage reserve"
         );
         self.pending.remove(&receipt_id);
         self.spent_this_period = self
@@ -463,11 +482,26 @@ impl PolicyVault {
     ) {
         match result {
             Ok(()) => {
-                self.update_receipt(
-                    receipt_id,
-                    SpendStatus::Settled,
-                    "the payment reached the payee",
-                );
+                // Preserve the audit distinction: a payout that went through
+                // owner approval keeps its OwnerApproved status; only the
+                // reason advances. (Found by the Step 3 live run: the old
+                // code stamped Settled over OwnerApproved, losing the
+                // "a human approved this" signal from the receipt table.)
+                let idx = receipt_id as u32;
+                let was_owner_approved = self
+                    .receipts
+                    .get(idx)
+                    .map(|r| r.status == SpendStatus::OwnerApproved)
+                    .unwrap_or(false);
+                if was_owner_approved {
+                    self.update_receipt(
+                        receipt_id,
+                        SpendStatus::OwnerApproved,
+                        "the owner approved this spend; the payment reached the payee",
+                    );
+                } else {
+                    self.update_receipt(receipt_id, SpendStatus::Settled, "the payment reached the payee");
+                }
                 env::log_str(&format!("receipt {receipt_id}: the payment reached the payee"));
             }
             Err(_) => {
@@ -817,6 +851,27 @@ mod tests {
     }
 
     #[test]
+    fn approved_payout_keeps_owner_approved_after_callback() {
+        // The ordering the live Step 3 run exercised and the old tests
+        // missed: queue, owner approval, then the payout callback. The
+        // terminal receipt must still show that a human approved it.
+        let mut c = setup();
+        let r = agent_ask(&mut c, good(), 8 * NEAR / 10, T0);
+        assert_eq!(r.status, SpendStatus::Queued);
+        owner_env(T0);
+        c.approve_spend(r.id);
+        // The payout promise resolved: the runtime calls the private
+        // callback with the contract itself as predecessor.
+        set_env(&vault(), 0, T0);
+        c.on_transfer_result(Ok(()), U128(8 * NEAR / 10), r.id);
+        set_env(&owner(), 0, T0);
+        let receipts = c.get_receipts(None);
+        assert_eq!(receipts[0].status, SpendStatus::OwnerApproved);
+        assert!(receipts[0].reason.contains("owner approved"));
+        assert!(receipts[0].reason.contains("reached the payee"));
+    }
+
+    #[test]
     fn period_rolls_and_budget_resets() {
         let mut c = setup();
         let _ = agent_ask(&mut c, good(), 4 * NEAR / 10, T0);
@@ -1070,6 +1125,62 @@ mod tests {
         // The cap check (1 NEAR) fires first, which is the stricter rule.
         assert_eq!(r.status, SpendStatus::Rejected);
         assert!(r.reason.contains("cap"));
+    }
+
+    #[test]
+    fn spend_above_spendable_headroom_is_refused_readably() {
+        // The Step 3 live finding, pinned as a test: the vault's total
+        // balance includes its storage reserve, which the protocol locks. A
+        // spend that fits the total but not the spendable headroom must
+        // produce a readable Rejected receipt, never a queued spend that
+        // later dies at the network with a raw storage error.
+        let mut c = setup();
+        // Custom context: balance 1 NEAR, storage 95,000 bytes. The reserve
+        // is 95,000 * 1e19 yocto = 0.95 NEAR, so the spendable headroom is
+        // 0.05 NEAR and the 0.4 NEAR request must be refused even though it
+        // passes every rule check (cap 1, auto 0.5, budget 2).
+        let mut b = VMContextBuilder::new();
+        b.current_account_id(vault())
+            .predecessor_account_id(agent())
+            .signer_account_id(agent())
+            .attached_deposit(NearToken::from_yoctonear(0))
+            .block_timestamp(T0)
+            .account_balance(NearToken::from_near(1))
+            .storage_usage(95_000);
+        testing_env!(b.build());
+        let r = c.request_spend(good(), U128(4 * NEAR / 10), "test purpose".to_string());
+        assert_eq!(r.status, SpendStatus::Rejected);
+        assert!(r.reason.contains("storage reserve"));
+        // Nothing moved: budget untouched, nothing pending, and the refusal
+        // itself is on the receipt table.
+        let s = status_of(&c, T0);
+        assert_eq!(s.spent_this_period.0, 0);
+        assert_eq!(s.pending_count, 0);
+        assert_eq!(s.receipts_count, 1);
+    }
+
+    #[test]
+    #[should_panic(expected = "storage reserve")]
+    fn approval_rechecks_spendable_headroom() {
+        // The headroom can shrink between queueing and approval. Approving a
+        // queued spend the vault can no longer pay must refuse with the
+        // readable message, not schedule a transfer that fails at the
+        // network after the owner already signed.
+        let mut c = setup();
+        let r = agent_ask(&mut c, good(), 8 * NEAR / 10, T0);
+        assert_eq!(r.status, SpendStatus::Queued);
+        // Owner context with a nearly-empty vault: balance 1 NEAR, storage
+        // 95,000 bytes => spendable 0.05 NEAR, far below the queued 0.8.
+        let mut b = VMContextBuilder::new();
+        b.current_account_id(vault())
+            .predecessor_account_id(owner())
+            .signer_account_id(owner())
+            .attached_deposit(NearToken::from_yoctonear(1))
+            .block_timestamp(T0)
+            .account_balance(NearToken::from_near(1))
+            .storage_usage(95_000);
+        testing_env!(b.build());
+        c.approve_spend(r.id);
     }
 
     #[test]
