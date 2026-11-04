@@ -56,7 +56,11 @@ const account = new Account(worker, provider, process.env.WORKER_PRIVATE_KEY);
 const out = await account.signAndSendTransaction({
   receiverId: worker,
   actions: [
-    actions.functionCall("fulfil", { task }, 100n * 10n ** 12n, 0n),
+    // 30 Tgas, not the house 100: fulfil actually burns 2-3 Tgas, and the
+    // worker account's headroom above its code-stake floor is only ~0.095
+    // NEAR. A 100 Tgas precharge fails whenever the network gas price
+    // spikes (observed live: 10x base price -> LackBalanceForState).
+    actions.functionCall("fulfil", { task }, 30n * 10n ** 12n, 0n),
   ],
   waitUntil: "EXECUTED",
   throwOnFailure: true,
