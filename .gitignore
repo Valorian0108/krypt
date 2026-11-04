@@ -7,6 +7,9 @@ target/
 node_modules/
 dist/
 
+# Runtime output of the data seller demo
+deliveries/
+
 # Secrets: never committed, per house rules and hackathon rules
 .env
 .env.*

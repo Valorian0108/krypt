@@ -1,0 +1,10 @@
+{
+  "name": "policy-counterparties",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Counterparty runners for the NEAR policy vault demo: the job-board vendor, the agent-side hiring cycle, and the data seller. Read paths use no keys; writes use only the role-scoped key named in .env.",
+  "dependencies": {
+    "near-api-js": "7.4.0"
+  }
+}
