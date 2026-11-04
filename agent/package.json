@@ -1,0 +1,10 @@
+{
+  "name": "policy-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Off-chain agent for the NEAR policy vault. Its only on-chain capability is request_spend on the vault, signed with a scoped FunctionCall access key held in .env.",
+  "dependencies": {
+    "near-api-js": "7.4.0"
+  }
+}
