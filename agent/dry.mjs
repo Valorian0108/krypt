@@ -79,7 +79,7 @@ if (isMain) {
     }
   }
   const provider = new JsonRpcProvider({
-    url: process.env.NEAR_RPC_URL || "https://rpc.testnet.near.org",
+    url: process.env.NEAR_RPC_URL || "https://test.rpc.fastnear.com",
   });
   const view = (contractId, method, args) =>
     provider.callFunction({ contractId, method, args, blockQuery: { finality: "final" } });

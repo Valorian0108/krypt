@@ -9,7 +9,7 @@
 // always shows the owner/payee account eqxdemi.testnet unless overridden.
 import { JsonRpcProvider, yoctoToNear } from "near-api-js";
 
-const url = process.env.NEAR_RPC_URL || "https://rpc.testnet.near.org";
+const url = process.env.NEAR_RPC_URL || "https://test.rpc.fastnear.com";
 const provider = new JsonRpcProvider({ url });
 
 const vault = process.env.VAULT_ACCOUNT_ID || "vault.eqxdemi.testnet";

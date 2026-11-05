@@ -31,7 +31,7 @@ for (const name of ["AGENT_ACCOUNT_ID", "AGENT_PRIVATE_KEY", "VAULT_ACCOUNT_ID"]
 const agent = process.env.AGENT_ACCOUNT_ID;
 const vault = process.env.VAULT_ACCOUNT_ID;
 const payee = payeeArg || process.env.PAYEE_ACCOUNT_ID || "eqxdemi.testnet";
-const url = process.env.NEAR_RPC_URL || "https://rpc.testnet.near.org";
+const url = process.env.NEAR_RPC_URL || "https://test.rpc.fastnear.com";
 const amountYocto = parseNearAmount(amountNear);
 if (amountYocto === null || BigInt(amountYocto) <= 0n) {
   console.error("amount must be a positive NEAR value, for example 0.05");

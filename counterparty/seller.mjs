@@ -23,7 +23,7 @@ if (!vault || !seller) {
   console.error("missing VAULT_ACCOUNT_ID or SELLER_ACCOUNT_ID in the environment");
   process.exit(2);
 }
-const url = process.env.NEAR_RPC_URL || "https://rpc.testnet.near.org";
+const url = process.env.NEAR_RPC_URL || "https://test.rpc.fastnear.com";
 const provider = new JsonRpcProvider({ url });
 
 // The synthetic dataset this seller trades in. Deterministic and clearly

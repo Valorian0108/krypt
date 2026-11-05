@@ -163,7 +163,7 @@ if (isMain) {
     console.error("missing AGENT_ACCOUNT_ID or AGENT_PRIVATE_KEY (the attack mode signs with the scoped agent key)");
     process.exit(2);
   }
-  const provider = new JsonRpcProvider({ url: process.env.NEAR_RPC_URL || "https://rpc.testnet.near.org" });
+  const provider = new JsonRpcProvider({ url: process.env.NEAR_RPC_URL || "https://test.rpc.fastnear.com" });
   const view = (contractId, method, args) =>
     provider.callFunction({ contractId, method, args, blockQuery: { finality: "final" } });
 

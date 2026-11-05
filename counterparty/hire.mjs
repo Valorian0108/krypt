@@ -32,7 +32,7 @@ for (const name of ["AGENT_ACCOUNT_ID", "AGENT_PRIVATE_KEY", "VAULT_ACCOUNT_ID",
 const agent = process.env.AGENT_ACCOUNT_ID;
 const vault = process.env.VAULT_ACCOUNT_ID;
 const worker = process.env.WORKER_ACCOUNT_ID;
-const url = process.env.NEAR_RPC_URL || "https://rpc.testnet.near.org";
+const url = process.env.NEAR_RPC_URL || "https://test.rpc.fastnear.com";
 const provider = new JsonRpcProvider({ url });
 
 async function view(contractId, method, args) {

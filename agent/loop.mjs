@@ -216,7 +216,7 @@ if (isMain) {
   const worker = process.env.WORKER_ACCOUNT_ID;
   const seller = process.env.SELLER_ACCOUNT_ID;
   const provider = new JsonRpcProvider({
-    url: process.env.NEAR_RPC_URL || "https://rpc.testnet.near.org",
+    url: process.env.NEAR_RPC_URL || "https://test.rpc.fastnear.com",
   });
   const view = (contractId, method, viewArgs) =>
     provider.callFunction({ contractId, method, args: viewArgs, blockQuery: { finality: "final" } });

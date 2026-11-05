@@ -20,7 +20,7 @@ if (!worker) {
   console.error("missing WORKER_ACCOUNT_ID in the environment (run with --env-file=.env from the repo root)");
   process.exit(2);
 }
-const url = process.env.NEAR_RPC_URL || "https://rpc.testnet.near.org";
+const url = process.env.NEAR_RPC_URL || "https://test.rpc.fastnear.com";
 const provider = new JsonRpcProvider({ url });
 
 async function view(method, args) {
