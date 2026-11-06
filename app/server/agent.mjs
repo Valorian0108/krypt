@@ -3,8 +3,10 @@ import { config, GAS } from "./config.mjs";
 import {
   callView,
   signAndSendWithKey,
+  storagePerByte,
+  viewAccount,
 } from "./rpc.mjs";
-import { explainFailure, nearToYocto, outcomeLogs } from "./chain.mjs";
+import { explainFailure, nearToYocto, outcomeLogs, yoctoToNear } from "./chain.mjs";
 import { appendActivity, getAgentRecord } from "./store.mjs";
 
 // The demo agent is a small, deterministic buyer. It quotes, checks the
@@ -115,6 +117,28 @@ async function runErrandInner({ vaultId, errandId }) {
   }
 
   const amountYocto = nearToYocto(errand.amountNear);
+
+  // Storage guard (anti-DoS): every receipt grows on-chain state, and NEAR
+  // demands the account balance cover storage_usage * cost-per-byte. If this
+  // job would eat into that lock, the network fails the write with
+  // LackBalanceForState and can leave the vault unable to act at all. A
+  // compromised or runaway agent could otherwise spam jobs until the vault
+  // bricks itself, so the server refuses the job while real headroom is
+  // missing. The old vaults predate the contract-side check, which makes
+  // this server-side guard the active defense for them.
+  const vaultAccount = await viewAccount(vaultId);
+  const storageLocked = BigInt(vaultAccount.storage_usage) * (await storagePerByte());
+  const liquid = BigInt(vaultAccount.amount) - storageLocked;
+  const headroom = nearToYocto("0.05");
+  if (liquid < amountYocto + headroom) {
+    const error = new Error(
+      `The vault has only ${yoctoToNear(liquid)} NEAR of spendable money left, and the ` +
+        "network needs headroom to store the receipt. Top up the vault before running " +
+        "more jobs — no money moved.",
+    );
+    error.status = 409;
+    throw error;
+  }
 
   // Free read-only check first, so the agent knows what the rules would say.
   const predicted = await callView(vaultId, "simulate_spend", {
