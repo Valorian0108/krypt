@@ -24,6 +24,21 @@ Each user gets their own vault account and their own agent account, created
 and funded by a sponsor. The sponsor pays creation costs and gas; its key is
 not an access key on any vault, so it cannot move a user's money.
 
+## How NEAR fits
+
+- Every vault is its own NEAR account, owned by its contract. Rules,
+  receipts, and the approval queue are contract state, so enforcement happens
+  on-chain. No off-chain component, including this app's own server, can
+  bypass a rule.
+- Sign-in uses NEAR FastAuth. The MPC network derives the user's signing key
+  from the login, so there is no seed phrase and the server never holds a
+  user key.
+- The agent's key is a FunctionCall access key scoped to one vault, one
+  method (`request_spend`), with a fixed gas allowance. A compromised agent
+  cannot transfer the vault's balance or touch any other account.
+- The sponsor creates each vault and agent as subaccounts and pays their
+  storage and gas, so users never handle NEAR to use the product.
+
 ## How a spend works
 
 1. The agent calls `request_spend(payee, amount, purpose)` on the vault,
@@ -110,6 +125,54 @@ To rebuild the contract: build the release wasm, replace
 `app/assets/policy_contract.wasm`, and update `wasmSha256` in
 `app/server/config.mjs` to the new hash. The server verifies it at boot.
 
+## Try it
+
+Level 1: the contract test suite. No accounts, no network, about one minute.
+
+```sh
+cd contract
+cargo test
+```
+
+You see 45 tests pass. They cover each rule the contract enforces: over-cap
+refusals, unapproved payees, exhausted budgets, expired rules, unregistered
+agents, the pending-approval queue, rule re-checks at approval time, payout
+callbacks, withdrawal destination checks, and storage headroom.
+
+Level 2: the full app on testnet. Needs a sponsor account holding testnet
+NEAR (free from a faucet; faucets are rate-limited, so topping up can take a
+while) and about 20 minutes.
+
+1. Create a NEAR testnet account and locate its key file, the JSON with a
+   `private_key` field that near-cli stores in its credentials directory.
+   Keep it outside this repository.
+2. Copy `app/env.example` to `app/.env`. Set `SPONSOR_ACCOUNT_ID` and
+   `SPONSOR_SUBACCOUNT_SUFFIX` to that account, `SPONSOR_KEY_PATH` to the key
+   file, and `INVITE_CODES` to any code you invent.
+3. In `app/`: `npm install`, then `npm run dev`.
+4. Open exactly `http://localhost:3000`. The FastAuth testnet client allows
+   sign-in from this origin only.
+5. Sign in with an email code or a passkey, then enter your invite code. You
+   see setup create your vault and agent accounts, deploy the contract, fund
+   both, and register the agent, each step linking to its explorer
+   transaction.
+6. Open Rules. A fresh vault starts closed: every purchase is refused until
+   you set limits. Set cap $2.00, auto-approve $0.40, budget $2.00 per week,
+   add the payee `data.eqxdemi.testnet` (the demo vendor), and save. You see
+   the on-chain confirmation with its transaction link.
+7. On Home, run "Buy this week's market data" ($0.10). You see it
+   auto-approve and pay with no prompt, and a receipt appear with its
+   explorer link.
+8. Run "Commission the full research report" ($1.00). You see it queue as
+   pending because it is above the auto-approve limit. Approve it, and you see
+   the payment execute and the receipt update.
+9. Run "Upgrade to the live premium feed" ($2.50). You see it refused: above
+   the per-purchase cap. No money moves.
+10. Run "Pay a vendor you never approved". You see it refused: the payee is
+    not on the allowlist.
+11. Open Receipts. You see every decision above, with status, reason, and
+    explorer links, matching what the contract wrote on-chain.
+
 ## Demo agent
 
 The bundled agent is deterministic, not an LLM. That is deliberate: it stands
@@ -126,6 +189,29 @@ is refused.
   price.
 - Invite-only with a small user cap. This is a demo deployment, not a hosted
   service.
+- Sign-in works only from `http://localhost:3000`: the FastAuth testnet
+  client's redirect allowlist contains that one origin. A hosted deployment
+  of this app therefore cannot offer sign-in.
+- Upgrading an already-deployed vault needs an owner-signed `DeployContract`;
+  the repository includes an operator page for it at
+  `app/deploy-upgrade.html`. Vaults provisioned from now on receive the
+  current bundled wasm.
+
+## Baseline and prior work
+
+- Every commit in this repository falls inside the NEAR HACKATHON window
+  (2026-11-01 to 2026-11-14). The first commit is dated 2026-11-03.
+- `agent/`, `counterparty/`, and `worker-contract/` are the CLI-first
+  iteration of this project, built in-window from Nov 3 to Nov 5, including
+  an attack suite with prompt-injection scenarios that exercises the
+  contract's refusals. The web app in `app/` was built on top of it on Nov 5
+  and Nov 6.
+- The visual design system (`design/soft.css` and the mocks) extends design
+  standards the owner maintained before the hackathon, and is disclosed here
+  as prior work per Q-005 of the hackathon rules.
+- Third-party libraries: near-sdk-rs, near-api-js, @near-js/transactions,
+  the @fast-auth-near SDKs, express, jose, react, vite, dotenv. Versions are
+  pinned in the package manifests.
 
 ## License
 
