@@ -123,8 +123,10 @@ export default function Home({
             </span>
           </div>
           <p className="note">
-            Another {usd(reserve, rate)} stays locked as network storage so your receipts are
-            kept safe.
+            Your vault holds {usd(spendable + reserve, rate)} in total. Another{" "}
+            {usd(reserve, rate)} of it is locked by the network as storage for your receipts —
+            still yours, just not spendable. This card is real money; the budget card is only a
+            limit you set.
           </p>
         </section>
 
@@ -148,6 +150,10 @@ export default function Home({
           {spentShare >= 80 && (
             <div className="lowline">Running low. Raise it in Rules, or wait for the reset.</div>
           )}
+          <p className="note">
+            The budget is a limit, not a balance. Raising it never adds money — it only lets
+            your agent spend more of the vault money on the left.
+          </p>
           <div className="acts">
             <button className="b-butter" onClick={() => onNav("rules")}>
               Change my rules

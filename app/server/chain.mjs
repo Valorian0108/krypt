@@ -181,6 +181,17 @@ export function explainFailure(outcome, what) {
   const text = JSON.stringify(failure);
   const panic = text.match(/Smart contract panicked: ([^"\\]+)/);
   if (panic) return panic[1].trim();
+  // Raw LackBalanceForState JSON is meaningless to owners. It means the
+  // account cannot keep the NEAR the network locks for its stored state, so
+  // the fix is always the same: put a little more NEAR in the vault.
+  if (text.includes("LackBalanceForState")) {
+    const needed = text.match(/"amount":\s*"?(\d+)"?/);
+    const amount = needed ? `${yoctoToNear(BigInt(needed[1]))} NEAR` : "more NEAR";
+    return (
+      `The vault is short on storage money: the network wants about ${amount} locked to keep ` +
+      "its receipts and rules stored. Top up the vault a little, then try this again."
+    );
+  }
   const execution = text.match(/"ExecutionError":"([^"]+)"/);
   if (execution) return execution[1].replace(/\\"/g, '"').slice(0, 300);
   return `${what} was refused by the network: ${text.slice(0, 300)}`;

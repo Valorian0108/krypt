@@ -14,12 +14,27 @@ export class RpcError extends Error {
 
 const endpoints = [...new Set([config.rpcUrl, ...config.rpcFallbacks])];
 
+// Archival nodes answer reads and receipt lookups, but they refuse to accept
+// new transactions. Broadcasting one to them burns a fallback attempt and
+// surfaces a "rejected send_tx" 500 to the user (seen live on 2026-11-06 when
+// saving rules), so keep a broadcast-safe list. Polling by hash still uses
+// every endpoint: archival nodes are excellent at looking up old receipts.
+const broadcastEndpoints = (() => {
+  const safe = endpoints.filter((endpoint) => !/archival/i.test(endpoint));
+  return safe.length ? safe : endpoints;
+})();
+
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function errorText(error) {
-  return typeof error === "string" ? error : JSON.stringify(error);
+  if (typeof error === "string") return error;
+  // JSON.stringify(undefined) returns undefined, and callers immediately run
+  // .includes on the result — that crashed pollOutcome with a TypeError
+  // (seen live on 2026-11-06) whenever an RpcError had no rpcError payload.
+  const text = error == null ? undefined : JSON.stringify(error);
+  return text === undefined ? String(error) : text;
 }
 
 function isTimeout(error) {
@@ -266,7 +281,7 @@ export async function broadcastSignedTransaction(signedBytes, senderAccountId) {
   let hash = null;
   let lastError = null;
 
-  for (const endpoint of endpoints) {
+  for (const endpoint of broadcastEndpoints) {
     try {
       const result = await post(
         endpoint,
