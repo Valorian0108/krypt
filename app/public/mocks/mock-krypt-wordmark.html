@@ -1,0 +1,213 @@
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Krypt · Wordmark</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Rubik:wght@400;500&family=Azeret+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; }
+body { background: var(--sand); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; padding: 24px; }
+:root {
+  --ink: #241C11;
+  --sand: #EFE3CC;
+  --cream: #FCF6E9;
+  --tomato: #F04E23;
+  --butter: #FFB937;
+  --leaf: #4E9B62;
+  --pool: #2A9D8F;
+  --ink-soft: #6B5B45;
+  --ink-mute: #6E5F49;
+  --disp: Fredoka, system-ui, sans-serif;
+  --body: Rubik, system-ui, sans-serif;
+  --mono: Azeret Mono, ui-monospace, monospace;
+}
+.page { max-width: 1100px; margin: 0 auto; }
+h1 { font-family: var(--disp); font-weight: 600; font-size: 30px; margin-bottom: 8px; letter-spacing: -0.5px; }
+.sub { font-family: var(--body); font-size: 15px; color: var(--ink-mute); margin-bottom: 40px; }
+.section { margin-bottom: 56px; }
+.section h2 { font-family: var(--disp); font-weight: 600; font-size: 20px; margin-bottom: 16px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+@media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+
+/* Wordmark */
+.krypt { font-family: var(--disp); font-weight: 700; color: var(--ink); display: inline-flex; align-items: baseline; gap: -2px; }
+.krypt .char { display: inline-block; position: relative; }
+.krypt.ink { color: var(--ink); }
+.krypt.cream { color: var(--cream); }
+.krypt.tomato { color: var(--tomato); }
+.krypt.leaf { color: var(--leaf); }
+.krypt.butter { color: var(--butter); }
+
+/* Header lockup */
+.header-lockup { background: var(--ink); border-radius: 14px; padding: 20px 28px; display: flex; align-items: center; gap: 16px; inline-size: fit-content; margin-bottom: 32px; }
+.header-lockup .krypt { color: var(--cream); font-size: 40px; letter-spacing: -2px; }
+
+/* Card */
+.card { background: var(--cream); border: 2px solid var(--ink); border-radius: 14px; padding: 24px; }
+.card h3 { font-family: var(--disp); font-weight: 600; font-size: 16px; margin-bottom: 8px; }
+.card p { font-family: var(--mono); font-size: 11px; color: var(--ink-mute); margin: 0; line-height: 1.5; }
+
+/* Construction */
+.construct { background: var(--ink); border-radius: 14px; padding: 32px; position: relative; }
+.grid-canvas { width: 300px; height: 300px; margin: 0 auto 24px auto; position: relative; background: rgba(252,246,233,0.05); border-radius: 10px; }
+.grid-line { position: absolute; background: rgba(252,246,233,0.12); }
+.grid-v { width: 2px; height: 100%; left: 50%; transform: translateX(-50%); }
+.grid-h { width: 100%; height: 2px; top: 50%; transform: translateY(-50%); }
+.grid-q1 { width: 2px; height: 100%; left: 25%; }
+.grid-q3 { width: 2px; height: 100%; left: 75%; }
+.logo-preview { width: 200px; height: 200px; margin: 0 auto; display: flex; align-items: center; justify-content: center; }
+
+/* Spec table */
+.spec-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 11px; }
+.spec-table td { border-bottom: 1px solid var(--ink-mute); padding: 8px 4px; color: var(--ink-mute); }
+.spec-table td:first-child { color: var(--ink-soft); width: 40%; }
+
+/* Sizes */
+.sizes-row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.size-block { width: 64px; height: 64px; background: var(--ink); border-radius: 10px; display: flex; align-items: center; justify-content: center; position: relative; }
+.size-block .krypt { font-size: 26px; gap: -2px; color: var(--cream); }
+.size-label { font-family: var(--mono); font-size: 10px; color: var(--ink-mute); margin-top: 6px; text-align: center; }
+
+/* Motion */
+.motion-card { background: var(--ink); border-radius: 14px; padding: 32px; display: flex; align-items: center; justify-content: center; gap: 24px; }
+.motion-krypt { font-size: 52px; color: var(--cream); gap: -2px; }
+.motion-krypt .char { animation: letterDrift 3s ease-in-out infinite; }
+@keyframes letterDrift {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 1; }
+  25% { transform: translate(2px, -2px) scale(1.02); opacity: 0.9; }
+  50% { transform: translate(0, 0) scale(1); opacity: 1; }
+  75% { transform: translate(-2px, 2px) scale(0.98); opacity: 0.9; }
+}
+.motion-label { font-family: var(--disp); font-weight: 600; font-size: 15px; color: var(--cream); white-space: nowrap; }
+
+/* Clear space */
+.clear-card { background: var(--cream); border: 2px solid var(--ink); border-radius: 14px; padding: 24px; position: relative; }
+.clear-card .krypt { font-size: 48px; margin: 0 auto 20px auto; display: block; color: var(--ink); }
+.clear-zone { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 180px; height: 180px; border: 2px dashed var(--ink-mute); border-radius: 50%; pointer-events: none; }
+
+.color-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.color-chip { width: 64px; height: 64px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 9px; color: var(--ink-mute); text-align: center; padding: 6px; line-height: 1.2; }
+.color-chip.ink { background: var(--ink); color: var(--cream); }
+.color-chip.cream { background: var(--cream); color: var(--ink); border: 2px solid var(--ink); }
+.color-chip.tomato { background: var(--tomato); color: var(--cream); }
+.color-chip.pool { background: var(--pool); color: var(--cream); }
+.color-chip.butter { background: var(--butter); color: var(--ink); }
+.color-chip.leaf { background: var(--leaf); color: var(--ink); }
+
+.foot { margin-top: 48px; font-family: var(--body); font-size: 13px; color: var(--ink-mute); border-top: 2px dashed var(--ink-mute); padding-top: 20px; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <h1>Krypt · Wordmark</h1>
+  <p class="sub">The wordmark alone. Fredoka 700. No arc. No seal. Just the letters.</p>
+
+  <!-- Header lockup -->
+  <div class="header-lockup">
+    <div class="krypt cream">KRYPT</div>
+  </div>
+
+  <!-- Section 1: Construction -->
+  <div class="section grid-2">
+    <div class="construct">
+      <div class="grid-canvas">
+        <div class="grid-line grid-v"></div>
+        <div class="grid-line grid-h"></div>
+        <div class="grid-line grid-q1"></div>
+        <div class="grid-line grid-q3"></div>
+      </div>
+      <div class="logo-preview">
+        <div class="krypt ink" style="font-size: 110px;">KRYPT</div>
+      </div>
+      <div class="card">
+        <h3>Construction grid</h3>
+        <p>Typeface: Fredoka 700<br>Cap height: 90 units at base size<br>Tracking: -4 units (tight)<br>Baseline aligned<br>Color: ink #241C11<br>Header color: cream #FCF6E9 on ink #241C11</p>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h3>Spec table</h3>
+        <div class="spec-table">
+          <tr><td>Wordmark</td><td>Fredoka 700</td></tr>
+          <tr><td>Tracking</td><td>-4 units</td></tr>
+          <tr><td>Cap height</td><td>90 units at base size</td></tr>
+          <tr><td>Color (idle)</td><td>Ink #241C11</td></tr>
+          <tr><td>Color (header)</td><td>Cream #FCF6E9</td></tr>
+          <tr><td>Background</td><td>Ink #241C11 only</td></tr>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Sizes -->
+  <div class="section">
+    <h2>Size variants</h2>
+    <div class="sizes-row">
+      <div>
+        <div class="size-block ink">
+          <div class="krypt cream">KRYPT</div>
+        </div>
+        <div class="size-label">16px · favicon</div>
+      </div>
+      <div>
+        <div class="size-block ink">
+          <div class="krypt cream">KRYPT</div>
+        </div>
+        <div class="size-label">24px · tab icon</div>
+      </div>
+      <div>
+        <div class="size-block ink">
+          <div class="krypt cream">KRYPT</div>
+        </div>
+        <div class="size-label">32px · header</div>
+      </div>
+      <div>
+        <div class="size-block ink">
+          <div class="krypt cream">KRYPT</div>
+        </div>
+        <div class="size-label">64px · large</div>
+      </div>
+    </div>
+    <div class="spec-box">
+      <div class="spec-row"><span>Smallest usable</span><span>16px</span></div>
+      <div class="spec-row"><span>Clear space</span><span>1× cap height</span></div>
+      <div class="spec-row"><span>Background (mark)</span><span>ink #241C11</span></div>
+      <div class="spec-row"><span>Mark color</span><span>cream #FCF6E9</span></div>
+    </div>
+  </div>
+
+  <!-- Section 3: Clear space -->
+  <div class="section grid-2">
+    <div class="clear-card">
+      <div class="clear-zone"></div>
+      <div class="krypt ink">KRYPT</div>
+      <div class="card" style="margin-top: auto;">
+        <h3>Clear space</h3>
+        <p>Radius equals one cap height from the wordmark center. No other element enters this zone.</p>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Color states</h3>
+      <div class="color-row">
+        <div class="color-chip ink">Idle · ink</div>
+        <div class="color-chip tomato">Pending · tomato</div>
+        <div class="color-chip leaf">Approved · leaf</div>
+        <div class="color-chip butter">Idle alt · butter</div>
+        <div class="color-chip pool">Pool · pool</div>
+      </div>
+      <p class="card" style="padding: 16px; margin-top: 16px;">Tomato = purchase waiting. Leaf = approved. Butter = idle. The wordmark shifts color with vault state.</p>
+    </div>
+  </div>
+
+  <div class="foot">
+    Colors: ink #241C11 · sand #EFE3CC · cream #FCF6E9 · tomato #F04E23 · butter #FFB937 · leaf #4E9B62 · pool #2A9D8F<br>
+    Type: Fredoka 700. No em dashes. No crypto imagery. Wordmark only, no arc, no motion.
+  </div>
+</div>
+
+</body>
+</html>

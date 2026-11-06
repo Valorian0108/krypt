@@ -1,0 +1,132 @@
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Krypt · Header Wordmarks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Rubik:wght@400;500&family=Azeret+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; }
+body { background: var(--sand); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; padding: 24px; }
+:root {
+  --ink: #241C11;
+  --sand: #EFE3CC;
+  --cream: #FCF6E9;
+  --tomato: #F04E23;
+  --butter: #FFB937;
+  --leaf: #4E9B62;
+  --pool: #2A9D8F;
+  --ink-soft: #6B5B45;
+  --ink-mute: #6E5F49;
+  --disp: Fredoka, system-ui, sans-serif;
+  --body: Rubik, system-ui, sans-serif;
+  --mono: Azeret Mono, ui-monospace, monospace;
+}
+.page { max-width: 980px; margin: 0 auto; }
+h1 { font-family: var(--disp); font-weight: 600; font-size: 30px; margin-bottom: 8px; letter-spacing: -0.5px; }
+.sub { font-family: var(--body); font-size: 15px; color: var(--ink-mute); margin-bottom: 40px; }
+.grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+@media (max-width: 640px) { .grid { grid-template-columns: 1fr; } body { padding: 16px; } }
+
+.header-card { border-radius: 14px; padding: 20px 24px; display: flex; flex-direction: column; gap: 24px; min-height: 260px; }
+.header-card h2 { font-family: var(--disp); font-weight: 600; font-size: 15px; color: var(--ink-mute); text-transform: none; margin: 0; }
+.card-body { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.mark { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; }
+.wordmark { font-family: var(--disp); font-weight: 600; font-size: 24px; letter-spacing: -1px; line-height: 1.0; white-space: nowrap; }
+.wordmark.mono { font-family: var(--mono); font-weight: 500; font-size: 18px; letter-spacing: 4px; }
+.wordmark.lower { font-family: var(--body); font-weight: 500; font-size: 22px; letter-spacing: 2px; }
+.accent { color: currentColor; }
+.tomato { color: var(--tomato); }
+.butter { color: var(--butter); }
+.leaf { color: var(--leaf); }
+.pool { color: var(--pool); }
+.spec { font-family: var(--mono); font-weight: 500; font-size: 11px; color: var(--ink-mute); margin-top: 2px; }
+
+/* Header variants */
+.h-ink { background: var(--ink); color: var(--cream); }
+.h-ink .wordmark { color: var(--cream); }
+.h-ink .mark { border: 3px solid var(--cream); }
+.h-ink .spec { color: var(--ink-mute); }
+
+.h-pool { background: var(--pool); color: var(--cream); }
+.h-pool .wordmark { color: var(--cream); }
+.h-pool .mark { border: 3px solid var(--cream); }
+.h-pool .spec { color: rgba(252,246,233,0.7); }
+
+.h-tomato { background: var(--tomato); color: var(--cream); }
+.h-tomato .wordmark { color: var(--cream); }
+.h-tomato .mark { border: 3px solid var(--cream); }
+.h-tomato .spec { color: rgba(252,246,233,0.7); }
+
+.h-cream { background: var(--cream); color: var(--ink); }
+.h-cream .wordmark { color: var(--ink); }
+.h-cream .mark { border: 3px solid var(--ink); }
+
+.h-sand { background: var(--sand); color: var(--ink); }
+.h-sand .wordmark { color: var(--ink); }
+.h-sand .mark { border: 3px solid var(--ink); }
+
+.foot { margin-top: 48px; font-family: var(--body); font-size: 13px; color: var(--ink-mute); border-top: 2px dashed var(--ink-mute); padding-top: 20px; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <h1>Krypt · Header Wordmarks</h1>
+  <p class="sub">How Krypt looks in the top bar — light on dark so it reads at small size. Each card shows the wordmark beside a logo mark.</p>
+
+  <div class="grid">
+    <div class="header-card h-ink">
+      <h2>Ink header · cream wordmark</h2>
+      <div class="card-body">
+        <div class="mark"></div>
+        <div class="wordmark">KRYPT</div>
+      </div>
+      <div class="spec">Background #241C11 · text #FCF6E9 · mark outline cream</div>
+    </div>
+
+    <div class="header-card h-pool">
+      <h2>Pool header · cream wordmark</h2>
+      <div class="card-body">
+        <div class="mark" style="background:var(--cream); border:none;"></div>
+        <div class="wordmark">KRYPT</div>
+      </div>
+      <div class="spec">Background #2A9D8F · text #FCF6E9 · mark solid cream</div>
+    </div>
+
+    <div class="header-card h-tomato">
+      <h2>Tomato header · cream wordmark</h2>
+      <div class="card-body">
+        <div class="mark" style="background:var(--cream); border:none;"></div>
+        <div class="wordmark lower">k<span class="butter">r</span>y<span class="leaf">p</span>t</div>
+      </div>
+      <div class="spec">Background #F04E23 · text #FCF6E9 · accent butter and leaf</div>
+    </div>
+
+    <div class="header-card h-cream">
+      <h2>Cream header · ink wordmark</h2>
+      <div class="card-body">
+        <div class="mark" style="background:var(--ink); border:none;"></div>
+        <div class="wordmark mono">KRYPT</div>
+      </div>
+      <div class="spec">Background #FCF6E9 · text #241C11 · mark solid ink</div>
+    </div>
+
+    <div class="header-card h-sand">
+      <h2>Sand header · ink wordmark</h2>
+      <div class="card-body">
+        <div class="mark" style="background:var(--ink); border:none;"></div>
+        <div class="wordmark">Krypt</div>
+      </div>
+      <div class="spec">Background #EFE3CC · text #241C11 · mark solid ink</div>
+    </div>
+  </div>
+
+  <div class="foot">
+    Colors: ink #241C11 · sand #EFE3CC · cream #FCF6E9 · tomato #F04E23 · butter #FFB937 · leaf #4E9B62 · pool #2A9D8F
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,151 @@
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Krypt · Logo System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Rubik:wght@400;500&family=Azeret+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; }
+body { background: var(--sand); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; padding: 24px; }
+:root {
+  --ink: #241C11;
+  --sand: #EFE3CC;
+  --cream: #FCF6E9;
+  --tomato: #F04E23;
+  --butter: #FFB937;
+  --leaf: #4E9B62;
+  --pool: #2A9D8F;
+  --ink-soft: #6B5B45;
+  --ink-mute: #6E5F49;
+  --disp: Fredoka, system-ui, sans-serif;
+  --body: Rubik, system-ui, sans-serif;
+  --mono: Azeret Mono, ui-monospace, monospace;
+}
+.page { max-width: 980px; margin: 0 auto; }
+h1 { font-family: var(--disp); font-weight: 600; font-size: 30px; margin-bottom: 8px; letter-spacing: -0.5px; }
+.sub { font-family: var(--body); font-size: 15px; color: var(--ink-mute); margin-bottom: 40px; }
+.grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+@media (max-width: 640px) { .grid { grid-template-columns: 1fr; } body { padding: 16px; } }
+
+/* Logo mark */
+.mark { width: 64px; height: 64px; position: relative; display: flex; align-items: center; justify-content: center; }
+.mark svg { width: 100%; height: 100%; display: block; }
+.mark .ring { stroke: var(--cream); stroke-width: 10; fill: none; stroke-linecap: round; transform-origin: 32px 32px; }
+.mark .seal { fill: var(--cream); transform-origin: 32px 32px; }
+
+/* Header lockup: ink background, cream mark + wordmark */
+.lockup-ink { background: var(--ink); padding: 20px 24px; border-radius: 14px; display: flex; align-items: center; gap: 16px; inline-size: fit-content; margin-bottom: 24px; }
+.lockup-ink .mark svg { filter: drop-shadow(0 2px 0 rgba(252,246,233,0.3)); }
+.lockup-ink .wordmark { font-family: var(--disp); font-weight: 600; font-size: 26px; color: var(--cream); letter-spacing: -1px; white-space: nowrap; }
+
+/* Card variants */
+.card { background: var(--cream); border: 2px solid var(--ink); border-radius: 14px; padding: 24px; display: flex; flex-direction: column; align-items: flex-start; gap: 14px; min-height: 200px; }
+.card h2 { font-family: var(--disp); font-weight: 600; font-size: 15px; color: var(--ink-mute); text-transform: none; margin: 0; }
+.card .lockup { display: flex; align-items: center; gap: 14px; }
+.card .lockup .mark { width: 48px; height: 48px; }
+.card .lockup .wordmark { font-family: var(--disp); font-weight: 600; font-size: 22px; color: var(--ink); letter-spacing: -1px; white-space: nowrap; }
+.card .spec { font-family: var(--mono); font-weight: 500; font-size: 11px; color: var(--ink-soft); margin-top: 6px; line-height: 1.4; }
+
+/* Sizes row */
+.sizes { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.size-box { width: 40px; height: 40px; background: var(--ink); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+.size-box .mark { width: 24px; height: 24px; }
+.size-box.ink .mark svg { stroke: var(--cream); }
+.size-box.ink .seal { fill: var(--cream); }
+
+/* Motion demo */
+.motion { background: var(--ink); padding: 24px; border-radius: 14px; display: flex; align-items: center; justify-content: center; gap: 20px; }
+.motion .mark { width: 80px; height: 80px; }
+.motion .mark .ring { animation: ringPulse 2s ease-in-out infinite; }
+.motion .mark .seal { animation: sealBreak 2s ease-in-out infinite; }
+@keyframes ringPulse {
+  0%, 100% { stroke-dashoffset: 0; transform: scale(1); }
+  50% { stroke-dashoffset: 4; transform: scale(1.03); }
+}
+@keyframes sealBreak {
+  0%, 40% { transform: translate(0, 0) scale(1); opacity: 1; }
+  60%, 100% { transform: translate(6px, -6px) scale(1.1); opacity: 0.8; }
+}
+.motion .label { font-family: var(--disp); font-weight: 600; font-size: 15px; color: var(--cream); text-transform: none; }
+
+.foot { margin-top: 48px; font-family: var(--body); font-size: 13px; color: var(--ink-mute); border-top: 2px dashed var(--ink-mute); padding-top: 20px; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <h1>Krypt · Logo System</h1>
+  <p class="sub">The seal on the vault wall. Closed by default. Breaks away when you approve.</p>
+
+  <!-- Header lockup -->
+  <div class="lockup-ink">
+    <div class="mark">
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <path class="ring" d="M8 32 A 24 24 0 0 1 56 32"/>
+        <circle class="seal" cx="16" cy="32" r="7"/>
+      </svg>
+    </div>
+    <div class="wordmark">KRYPT</div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>The mark alone</h2>
+      <div class="mark">
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <path class="ring" d="M8 32 A 24 24 0 0 1 56 32"/>
+          <circle class="seal" cx="16" cy="32" r="7"/>
+        </svg>
+      </div>
+      <div class="spec">Thick cream band on ink. Solid seal dot pressed to the inner left edge. One vault wall, one seal.</div>
+    </div>
+
+    <div class="card">
+      <h2>Mark + wordmark</h2>
+      <div class="lockup">
+        <div class="mark">
+          <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+            <path class="ring" d="M8 32 A 24 24 0 0 1 56 32"/>
+            <circle class="seal" cx="16" cy="32" r="7"/>
+          </svg>
+        </div>
+        <div class="wordmark">KRYPT</div>
+      </div>
+      <div class="spec">Fredoka 600, cream. Clear space equals the height of the seal dot on all sides.</div>
+    </div>
+
+    <div class="card">
+      <h2>At small sizes</h2>
+      <div class="sizes">
+        <div class="size-box ink"><div class="mark"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path class="ring" d="M8 32 A 24 24 0 0 1 56 32"/><circle class="seal" cx="16" cy="32" r="7"/></svg></div></div>
+        <div class="size-box ink"><div class="mark"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path class="ring" d="M8 32 A 24 24 0 0 1 56 32"/><circle class="seal" cx="16" cy="32" r="7"/></svg></div></div>
+        <div class="size-box ink"><div class="mark"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path class="ring" d="M8 32 A 24 24 0 0 1 56 32"/><circle class="seal" cx="16" cy="32" r="7"/></svg></div></div>
+      </div>
+      <div class="spec">Works at 16px (favicon), 32px (header), 64px (large). The seal dot stays visible at every size.</div>
+    </div>
+
+    <div class="card">
+      <h2>Motion (header state)</h2>
+      <div class="motion">
+        <div class="mark">
+          <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+            <path class="ring" d="M8 32 A 24 24 0 0 1 56 32" stroke-dasharray="96" stroke-dashoffset="0"/>
+            <circle class="seal" cx="16" cy="32" r="7"/>
+          </svg>
+        </div>
+        <div class="label">Seal pulses when a purchase waits for your approval</div>
+      </div>
+      <div class="spec">CSS animation only. No video, no glassmorphism. The seal drifts slightly, like wax softening.</div>
+    </div>
+  </div>
+
+  <div class="foot">
+    Colors: ink #241C11 · sand #EFE3CC · cream #FCF6E9 · tomato #F04E23 · butter #FFB937 · leaf #4E9B62 · pool #2A9D8F<br>
+    Type: Fredoka 600 for the wordmark. No em dashes. No crypto imagery.
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ring 1 · Direction B · Mission Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0e13;
+  --panel:#10161d;
+  --panel2:#0d1218;
+  --line:#1e2a36;
+  --line2:#2a3a4a;
+  --text:#e6edf3;
+  --muted:#8b98a5;
+  --cyan:#56cfe1;
+  --phos:#64ffae;
+  --amber:#ffb454;
+  --red:#ff6b6b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:
+    linear-gradient(rgba(86,207,225,.045) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(86,207,225,.045) 1px,transparent 1px),
+    var(--bg);
+  background-size:34px 34px,34px 34px,auto;
+  color:var(--text);
+  font-family:Barlow,system-ui,sans-serif;font-size:15px;line-height:1.5;
+  padding-bottom:60px;
+}
+.cond{font-family:"Barlow Condensed",system-ui,sans-serif}
+.mono{font-family:"IBM Plex Mono",ui-monospace,Consolas,monospace}
+
+/* specimen label */
+.specimen{
+  background:#05080b;border-bottom:1px solid var(--line2);
+  padding:13px 22px;display:flex;gap:16px;align-items:baseline;flex-wrap:wrap;
+}
+.specimen strong{font-family:"Barlow Condensed",system-ui;font-size:19px;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan)}
+.specimen span{font-size:13px;color:var(--muted)}
+.specimen .feat{border:1px solid var(--line2);color:var(--text);padding:2px 10px;font-size:12px;font-family:"IBM Plex Mono",monospace}
+
+.app{max-width:1100px;margin:24px auto 0;padding:0 20px}
+
+/* topbar */
+.topbar{
+  display:flex;align-items:center;gap:16px;
+  border:1px solid var(--line);background:var(--panel2);
+  padding:10px 16px;margin-bottom:22px;
+}
+.brand{font-family:"Barlow Condensed",system-ui;font-weight:700;font-size:21px;letter-spacing:.14em;text-transform:uppercase}
+.brand b{color:var(--cyan)}
+.tag{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;color:var(--phos);border:1px solid rgba(100,255,174,.35);padding:2px 8px}
+.led{width:8px;height:8px;border-radius:50%;background:var(--phos);box-shadow:0 0 8px var(--phos);animation:blink 2.2s steps(1) infinite}
+@keyframes blink{0%,70%{opacity:1}71%,100%{opacity:.25}}
+.top-right{margin-left:auto;display:flex;align-items:center;gap:14px;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted)}
+.ghostbtn{
+  font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.06em;
+  background:transparent;color:var(--muted);border:1px solid var(--line2);
+  padding:5px 12px;cursor:pointer;transition:.15s;
+}
+.ghostbtn:hover{color:var(--text);border-color:var(--cyan)}
+
+.panel{border:1px solid var(--line);background:var(--panel);position:relative}
+.panel::before,.panel::after{
+  content:"";position:absolute;width:10px;height:10px;border-color:var(--cyan);border-style:solid;
+}
+.panel::before{top:-1px;left:-1px;border-width:2px 0 0 2px}
+.panel::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
+.plabel{
+  font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;
+  color:var(--muted);text-transform:uppercase;margin-bottom:10px;
+}
+.plabel::before{content:"▸ ";color:var(--cyan)}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-bottom:18px}
+.bigmoney{
+  font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:64px;line-height:1;
+  color:var(--phos);text-shadow:0 0 22px rgba(100,255,174,.4);letter-spacing:-.02em;
+}
+.submoney{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--muted);margin-top:8px}
+.submoney b{color:var(--text);font-weight:500}
+.rulesrow{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.rchip{font-family:"IBM Plex Mono",monospace;font-size:11.5px;border:1px solid var(--line2);padding:4px 10px;color:var(--text)}
+.rchip i{color:var(--muted);font-style:normal}
+.barnum{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:40px;color:var(--amber);text-shadow:0 0 16px rgba(255,180,84,.3)}
+.gauge{height:8px;border:1px solid var(--line2);background:#0a0f14;margin:14px 0 8px;position:relative}
+.gauge-fill{height:100%;width:45%;background:linear-gradient(90deg,var(--amber),#ff9d2e);box-shadow:0 0 10px rgba(255,180,84,.5)}
+.gauge-ticks{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 24px,rgba(10,14,19,.9) 24px 25px)}
+.meta{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--muted);letter-spacing:.04em}
+
+/* pending */
+.pending{
+  border:1px solid var(--line);border-left:4px solid var(--amber);
+  background:linear-gradient(90deg,rgba(255,180,84,.07),transparent 40%),var(--panel);
+  padding:18px 20px;margin-bottom:22px;
+  display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;
+}
+.phead{display:flex;align-items:center;gap:10px;font-family:"Barlow Condensed",system-ui;font-weight:600;font-size:20px;letter-spacing:.08em;text-transform:uppercase;color:var(--amber)}
+.pled{width:10px;height:10px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber);animation:blink 1s steps(1) infinite}
+.pdetail{font-family:"IBM Plex Mono",monospace;font-size:13.5px;margin-top:6px;color:var(--text)}
+.pdetail i{color:var(--muted);font-style:normal}
+.pnote{font-size:12.5px;color:var(--muted);margin-top:6px}
+.pactions{display:flex;gap:10px}
+.actbtn{
+  font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:13px;letter-spacing:.08em;
+  padding:10px 18px;cursor:pointer;border:1px solid;transition:.15s;text-transform:uppercase;
+}
+.actbtn.go{background:rgba(100,255,174,.1);border-color:var(--phos);color:var(--phos)}
+.actbtn.go:hover{background:var(--phos);color:#04140c;box-shadow:0 0 18px rgba(100,255,174,.5)}
+.actbtn.stop{background:transparent;border-color:#5a3540;color:var(--red)}
+.actbtn.stop:hover{border-color:var(--red);box-shadow:0 0 14px rgba(255,107,107,.3)}
+
+/* section head */
+.shead{display:flex;align-items:baseline;gap:14px;margin:26px 0 12px}
+.shead h2{font-family:"Barlow Condensed",system-ui;font-weight:600;font-size:24px;letter-spacing:.1em;text-transform:uppercase}
+.shead .num{font-family:"IBM Plex Mono",monospace;color:var(--cyan);font-size:13px}
+.shead p{color:var(--muted);font-size:13px;margin-left:auto;max-width:460px;text-align:right}
+
+/* jobs */
+.jobs{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.job{
+  border:1px solid var(--line);background:var(--panel);padding:14px 16px;
+  display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;transition:.15s;
+}
+.job:hover{border-color:var(--line2);background:#131b24}
+.job .idx{font-family:"IBM Plex Mono",monospace;color:var(--cyan);font-size:13px}
+.job h3{font-family:"Barlow Condensed",system-ui;font-weight:600;font-size:18px;letter-spacing:.03em}
+.job .ven{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
+.job .amt{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:18px;text-align:right}
+.job .amt small{display:block;font-weight:400;font-size:10.5px;color:var(--muted)}
+.job .row2{grid-column:2/4;display:flex;align-items:center;gap:10px;margin-top:2px}
+.vtag{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.1em;padding:3px 8px;border:1px solid;text-transform:uppercase}
+.vtag.go{color:var(--phos);border-color:rgba(100,255,174,.4)}
+.vtag.ask{color:var(--amber);border-color:rgba(255,180,84,.4)}
+.vtag.no{color:var(--red);border-color:rgba(255,107,107,.4)}
+.runbtn{
+  margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;
+  background:transparent;border:1px solid var(--line2);color:var(--text);padding:6px 14px;cursor:pointer;transition:.15s;
+}
+.runbtn:hover{border-color:var(--cyan);color:var(--cyan)}
+
+/* receipts */
+table{width:100%;border-collapse:collapse;border:1px solid var(--line);background:var(--panel)}
+th{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);text-align:left;padding:9px 14px;border-bottom:1px solid var(--line2);font-weight:500;
+}
+td{font-family:"IBM Plex Mono",monospace;font-size:12.5px;padding:10px 14px;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#131b24}
+.st{letter-spacing:.06em;font-size:11px;text-transform:uppercase}
+.st.paid{color:var(--phos)}
+.st.you{color:var(--cyan)}
+.st.no{color:var(--red)}
+.tx{color:var(--muted)}
+.tx a{color:var(--cyan);text-decoration:none;border-bottom:1px dotted}
+.moreline{margin-top:12px;text-align:center}
+
+.footstrip{
+  margin-top:34px;border-top:1px solid var(--line);padding-top:12px;
+  font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;
+  display:flex;gap:18px;flex-wrap:wrap;
+}
+@media (max-width:900px){.hero{grid-template-columns:1fr}.jobs{grid-template-columns:1fr}.pending{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="specimen">
+  <strong>Direction B · Mission Control</strong>
+  <span>Dark instrumentation. Your money as a system you monitor and command, with live status lights.</span>
+  <span class="feat">phosphor numbers with glow</span>
+  <span class="feat">blinking status LEDs</span>
+  <span class="feat">mono readouts + hairline grid</span>
+</div>
+
+<div class="app">
+
+  <div class="topbar">
+    <span class="brand">Ring<b>1</b></span>
+    <span class="tag">TESTNET // DEMO MONEY</span>
+    <div class="top-right">
+      <span class="led"></span>
+      <span>OWNER: SAM · SESSION SECURE</span>
+      <button class="ghostbtn">SIGN OUT</button>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="panel" style="padding:20px 22px">
+      <div class="plabel">Available to spend</div>
+      <div class="bigmoney">$12.89</div>
+      <div class="submoney">EXACT BALANCE <b>2.578862926 NEAR</b> · STORAGE LOCK 0.02 NEAR</div>
+      <div class="rulesrow">
+        <span class="rchip"><i>CAP/PURCHASE</i> $2.00</span>
+        <span class="rchip"><i>AUTO-APPROVE</i> ≤ $0.40</span>
+        <span class="rchip"><i>SELLERS</i> NORTHSTAR DATA ✓</span>
+        <span class="rchip" style="border-color:var(--cyan);color:var(--cyan)">EDIT RULES</span>
+      </div>
+    </div>
+    <div class="panel" style="padding:20px 22px">
+      <div class="plabel">Weekly budget</div>
+      <div class="barnum">$0.90 <span style="font-size:16px;color:var(--muted)">LEFT</span></div>
+      <div class="gauge"><div class="gauge-fill"></div><div class="gauge-ticks"></div></div>
+      <div class="meta">SPENT 1.10 / 2.00 USD · RESET MON 00:00</div>
+    </div>
+  </div>
+
+  <div class="pending">
+    <div>
+      <div class="phead"><span class="pled"></span> Awaiting owner decision · 1 queued</div>
+      <div class="pdetail">NORTHSTAR DATA · <b>$1.00</b> <i>(0.20 NEAR)</i> · "FULL RESEARCH REPORT WITH SOURCES"</div>
+      <div class="pnote">Funds move only on your signature. Refusing just records the decision on the network.</div>
+    </div>
+    <div class="pactions">
+      <button class="actbtn go">Approve + sign</button>
+      <button class="actbtn stop">Refuse</button>
+    </div>
+  </div>
+
+  <div class="shead">
+    <span class="num">01</span>
+    <h2>Agent jobs</h2>
+    <p>Each job fires a real purchase request on the test network. Predicted outcome from your current rules.</p>
+  </div>
+  <div class="jobs">
+    <div class="job">
+      <span class="idx">J-01</span>
+      <div>
+        <h3>Buy this week's market data</h3>
+        <div class="ven">Northstar Data</div>
+      </div>
+      <div class="amt">$0.10<small>0.02 NEAR</small></div>
+      <div class="row2">
+        <span class="vtag go">Auto-clears</span>
+        <button class="runbtn">RUN ▸</button>
+      </div>
+    </div>
+    <div class="job">
+      <span class="idx">J-02</span>
+      <div>
+        <h3>Commission the full research report</h3>
+        <div class="ven">Northstar Data</div>
+      </div>
+      <div class="amt">$1.00<small>0.20 NEAR</small></div>
+      <div class="row2">
+        <span class="vtag ask">Queues for owner</span>
+        <button class="runbtn">RUN ▸</button>
+      </div>
+    </div>
+    <div class="job">
+      <span class="idx">J-03</span>
+      <div>
+        <h3>Upgrade to the live premium feed</h3>
+        <div class="ven">Northstar Data</div>
+      </div>
+      <div class="amt">$2.50<small>0.50 NEAR</small></div>
+      <div class="row2">
+        <span class="vtag no">Refused by cap</span>
+        <button class="runbtn">RUN ▸</button>
+      </div>
+    </div>
+    <div class="job">
+      <span class="idx">J-04</span>
+      <div>
+        <h3>Pay a vendor you never approved</h3>
+        <div class="ven">Proof Desk</div>
+      </div>
+      <div class="amt">$0.10<small>0.02 NEAR</small></div>
+      <div class="row2">
+        <span class="vtag no">Refused by allowlist</span>
+        <button class="runbtn">RUN ▸</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="shead">
+    <span class="num">02</span>
+    <h2>Receipt log</h2>
+    <p>Last 3 of 5. The full log lives on the network itself.</p>
+  </div>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Vendor</th><th>Purpose</th><th>Amount</th><th>Status</th><th>Tx</th><th>Time</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>#5</td><td>NORTHSTAR DATA</td><td>Full research report</td>
+        <td>$1.00</td><td><span class="st you">Owner approved</span></td>
+        <td class="tx"><a href="#">8EUt…bYyf</a></td><td class="tx">T-2H</td>
+      </tr>
+      <tr>
+        <td>#4</td><td>NORTHSTAR DATA</td><td>Premium feed upgrade</td>
+        <td>$2.50</td><td><span class="st no">Rejected · cap</span></td>
+        <td class="tx"><a href="#">EBbj…4U61</a></td><td class="tx">T-2H</td>
+      </tr>
+      <tr>
+        <td>#3</td><td>NORTHSTAR DATA</td><td>Weekly market data</td>
+        <td>$0.10</td><td><span class="st paid">Settled · auto</span></td>
+        <td class="tx"><a href="#">CsFB…P8oR</a></td><td class="tx">T-3H</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="moreline"><button class="ghostbtn">SHOW ALL 5 RECEIPTS</button></div>
+
+  <div class="footstrip">
+    <span>TESTNET</span><span>DEMO MONEY @ 5.00 USD/NEAR</span><span>VAULT: V1-7E11…·EQXDEMI.TESTNET</span><span>AGENT KEY: request_spend ONLY · 0.2 NEAR FEE CAP</span>
+  </div>
+
+</div>
+</body>
+</html>

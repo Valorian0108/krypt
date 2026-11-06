@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Krypt operator: contract upgrade</title>
+    <style>
+      body {
+        margin: 0;
+        background: #fcf6e9;
+        color: #241c11;
+        font: 16px/1.5 Rubik, system-ui, sans-serif;
+        padding: 40px;
+      }
+      h1 {
+        font: 700 28px/1.2 Fredoka, system-ui, sans-serif;
+        letter-spacing: -0.5px;
+        margin: 0 0 8px;
+      }
+      p.note {
+        max-width: 640px;
+        color: #6b5b45;
+      }
+      button {
+        font: 600 16px Fredoka, system-ui, sans-serif;
+        background: #ffb937;
+        color: #241c11;
+        border: 2px solid #241c11;
+        border-radius: 999px;
+        padding: 10px 22px;
+        cursor: pointer;
+        box-shadow: 3px 3px 0 #241c11;
+        margin-right: 10px;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+      #facts {
+        margin: 20px 0;
+        display: grid;
+        gap: 6px;
+        max-width: 760px;
+      }
+      .fact {
+        display: flex;
+        gap: 10px;
+        align-items: baseline;
+      }
+      .fact span {
+        min-width: 190px;
+        color: #6b5b45;
+      }
+      .fact code {
+        font: 12px/1.4 "Azeret Mono", ui-monospace, monospace;
+        word-break: break-all;
+      }
+      #log {
+        background: #241c11;
+        color: #c9b899;
+        font: 12px/1.6 "Azeret Mono", ui-monospace, monospace;
+        padding: 14px;
+        border-radius: 10px;
+        max-width: 760px;
+        white-space: pre-wrap;
+        min-height: 140px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Contract upgrade, one vault at a time</h1>
+    <p class="note">
+      Operator page, not part of the product. It signs one DeployContract
+      transaction with your login key and broadcasts it straight to the
+      network, because the product server refuses to carry deploys on
+      purpose. Read the hashes below before you approve anything. Your vault
+      state, rules and receipts are untouched by a code upgrade.
+    </p>
+    <button id="signin" hidden>Sign in</button>
+    <button id="go" hidden>Upgrade this vault</button>
+    <div id="facts"></div>
+    <pre id="log"></pre>
+    <script type="module" src="/src/deploy-upgrade.ts"></script>
+  </body>
+</html>

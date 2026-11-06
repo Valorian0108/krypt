@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="600" height="400" viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- KRYPT Logo Technical Specification -->
+  <!-- Base unit: 1px = 1 unit at this viewBox. -->
+  <!-- All measurements derived from a 120-unit cap height. -->
+  
+  <defs>
+    <style>
+      .grid { stroke: #FCF6E9; stroke-width: 1; opacity: 0.15; }
+      .grid-major { stroke: #FCF6E9; stroke-width: 1; opacity: 0.3; }
+      .axis { stroke: #F04E23; stroke-width: 2; opacity: 0.6; }
+      .dim-line { stroke: #6B5B45; stroke-width: 1; stroke-dasharray: 4,4; marker-end: url(#arrow); }
+      .dim-text { font-family: monospace; font-size: 10px; fill: #6B5B45; }
+      .mark-ring { fill: none; stroke: #FCF6E9; stroke-width: 10; stroke-linecap: round; }
+      .mark-seal { fill: #FCF6E9; }
+      .spec-box { fill: none; stroke: #241C11; stroke-width: 2; rx: 8; }
+      .spec-bg { fill: #FCF6E9; }
+      .spec-label { font-family: 'Azeret Mono', monospace; font-size: 11px; fill: #6E5F49; }
+      .spec-value { font-family: 'Azeret Mono', monospace; font-size: 11px; fill: #241C11; font-weight: 600; }
+    </style>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="4" refY="2" orient="auto">
+      <path d="M0,0 L0,4 L4,2 Z" fill="#6B5B45"/>
+    </marker>
+  </defs>
+
+  <!-- ========================================== -->
+  <!-- CONSTRUCTION GRID (background)             -->
+  <!-- ========================================== -->
+  <rect x="0" y="0" width="600" height="400" fill="#EFE3CC"/>
+  
+  <!-- Column grid: 12 columns, 40px gutters -->
+  <line x1="40" y1="0" x2="40" y2="400" class="grid"/>
+  <line x1="120" y1="0" x2="120" y2="400" class="grid"/>
+  <line x1="200" y1="0" x2="200" y2="400" class="grid"/>
+  <line x1="280" y1="0" x2="280" y2="400" class="grid"/>
+  <line x1="360" y1="0" x2="360" y2="400" class="grid"/>
+  <line x1="440" y1="0" x2="440" y2="400" class="grid"/>
+  <line x1="520" y1="0" x2="520" y2="400" class="grid"/>
+  <line x1="600" y1="0" x2="600" y2="400" class="grid"/>
+  
+  <!-- Row grid -->
+  <line x1="0" y1="40" x2="600" y2="40" class="grid"/>
+  <line x1="0" y1="120" x2="600" y2="120" class="grid"/>
+  <line x1="0" y1="200" x2="600" y2="200" class="grid"/>
+  <line x1="0" y1="280" x2="600" y2="280" class="grid"/>
+  <line x1="0" y1="360" x2="600" y2="360" class="grid"/>
+  <line x1="0" y1="400" x2="600" y2="400" class="grid"/>
+
+  <!-- ========================================== -->
+  <!-- LOGO MARK (construction)                   -->
+  <!-- Base: 120x120 units                        -->
+  <!-- Positioned at x=240, y=140 for this sheet  -->
+  <!-- ========================================== -->
+  <g transform="translate(240, 140)">
+    <!-- Seal circle: diameter 28, center at (34, 60) -->
+    <circle cx="34" cy="60" r="14" class="mark-seal"/>
+    
+    <!-- Ring arc: radius 36, from 9 o'clock to 3 o'clock -->
+    <!-- Center of arc at (60, 60), start (24, 60), end (96, 60) -->
+    <path d="M 24 60 A 36 36 0 0 1 96 60" class="mark-ring"/>
+    
+    <!-- Centerlines for reference -->
+    <line x1="0" y1="60" x2="120" y2="60" class="axis"/>
+    <line x1="60" y1="0" x2="60" y2="120" class="axis"/>
+    
+    <!-- Dimension: seal diameter -->
+    <line x1="20" y1="74" x2="48" y2="74" class="dim-line"/>
+    <text x="34" y="88" class="dim-text" text-anchor="middle">28</text>
+    
+    <!-- Dimension: ring radius -->
+    <line x1="60" y1="60" x2="96" y2="60" class="dim-line"/>
+    <text x="78" y="50" class="dim-text">36</text>
+    
+    <!-- Dimension: cap height (letter stem height) -->
+    <line x1="120" y1="30" x2="120" y2="90" class="dim-line"/>
+    <text x="128" y="60" class="dim-text" transform="rotate(90 128,60)">90</text>
+  </g>
+
+  <!-- ========================================== -->
+  <!-- WORDMARK SPEC                              -->
+  <!-- ========================================== -->
+  <g transform="translate(240, 290)">
+    <text x="0" y="0" class="spec-label" fill="#241C11">Wordmark: Fredoka 700</text>
+    <text x="0" y="18" class="spec-value">KRYPT</text>
+    <text x="0" y="34" class="spec-label">Cap height: 90 units</text>
+    <text x="0" y="48" class="spec-label">Tracking: -4 units (tight)</text>
+    <text x="0" y="62" class="spec-label">Baseline aligned with seal center</text>
+    <text x="0" y="76" class="spec-label">Seal replaces the Y counter</text>
+    <text x="0" y="90" class="spec-label">Seal center Y = wordmark baseline Y</text>
+  </g>
+
+  <!-- ========================================== -->
+  <!-- COLOR STATES                               -->
+  <!-- ========================================== -->
+  <g transform="translate(420, 140)">
+    <text x="0" y="-20" class="spec-label">Color states</text>
+    
+    <!-- Idle: ink -->
+    <g transform="translate(0, 0)">
+      <circle cx="20" cy="40" r="14" fill="#241C11"/>
+      <path d="M 6 40 A 36 36 0 0 1 34 40" fill="none" stroke="#241C11" stroke-width="10" stroke-linecap="round"/>
+      <text x="50" y="45" class="spec-label">Idle · ink #241C11</text>
+    </g>
+    
+    <!-- Pending: tomato -->
+    <g transform="translate(120, 0)">
+      <circle cx="20" cy="40" r="14" fill="#F04E23"/>
+      <path d="M 6 40 A 36 36 0 0 1 34 40" fill="none" stroke="#F04E23" stroke-width="10" stroke-linecap="round"/>
+      <text x="50" y="45" class="spec-label">Pending · tomato #F04E23</text>
+    </g>
+    
+    <!-- Approved: leaf -->
+    <g transform="translate(240, 0)">
+      <circle cx="20" cy="40" r="14" fill="#4E9B62"/>
+      <path d="M 6 40 A 36 36 0 0 1 34 40" fill="none" stroke="#4E9B62" stroke-width="10" stroke-linecap="round"/>
+      <text x="50" y="45" class="spec-label">Approved · leaf #4E9B62</text>
+    </g>
+  </g>
+
+  <!-- ========================================== -->
+  <!-- SIZE VARIANTS                              -->
+  <!-- ========================================== -->
+  <g transform="translate(420, 260)">
+    <text x="0" y="-20" class="spec-label">Size variants</text>
+    
+    <!-- 16px -->
+    <g transform="translate(0, 0)">
+      <circle cx="8" cy="16" r="4" fill="#FCF6E9"/>
+      <path d="M 2 16 A 10 10 0 0 1 14 16" fill="none" stroke="#FCF6E9" stroke-width="2" stroke-linecap="round"/>
+      <text x="20" y="28" class="spec-label">16px · favicon</text>
+    </g>
+    
+    <!-- 32px -->
+    <g transform="translate(60, 0)">
+      <circle cx="14" cy="32" r="7" fill="#FCF6E9"/>
+      <path d="M 4 32 A 20 20 0 0 1 28 32" fill="none" stroke="#FCF6E9" stroke-width="5" stroke-linecap="round"/>
+      <text x="38" y="52" class="spec-label">32px · header</text>
+    </g>
+    
+    <!-- 64px -->
+    <g transform="translate(140, 0)">
+      <circle cx="28" cy="64" r="14" fill="#FCF6E9"/>
+      <path d="M 8 64 A 40 40 0 0 1 56 64" fill="none" stroke="#FCF6E9" stroke-width="10" stroke-linecap="round"/>
+      <text x="62" y="86" class="spec-label">64px · large</text>
+    </g>
+  </g>
+
+  <!-- ========================================== -->
+  <!-- CLEAR SPACE                                -->
+  <!-- ========================================== -->
+  <g transform="translate(240, 320)">
+    <circle cx="60" cy="60" r="28" fill="none" stroke="#6E5F49" stroke-width="2" stroke-dasharray="6,6"/>
+    <circle cx="34" cy="60" r="14" fill="#FCF6E9"/>
+    <path d="M 24 60 A 36 36 0 0 1 96 60" fill="none" stroke="#FCF6E9" stroke-width="10" stroke-linecap="round"/>
+    <text x="60" y="110" class="spec-label" text-anchor="middle">Clear space: 1× seal diameter (28 units)</text>
+    <text x="60" y="124" class="spec-label" text-anchor="middle">radius from mark center</text>
+  </g>
+
+  <!-- ========================================== -->
+  <!-- FOOTER                                     -->
+  <!-- ========================================== -->
+  <text x="40" y="380" class="spec-label">Palette: ink #241C11 · sand #EFE3CC · cream #FCF6E9 · tomato #F04E23 · butter #FFB937 · leaf #4E9B62 · pool #2A9D8F</text>
+  <text x="40" y="394" class="spec-label">Type: Fredoka 700 · No em dashes · No crypto imagery · Seal = vault mark, not coin</text>
+</svg>

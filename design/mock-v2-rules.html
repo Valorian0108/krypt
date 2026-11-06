@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Soft Machine · Rules</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Rubik:wght@400;500&family=Azeret+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="soft.css">
+<style>
+.pagehead{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap}
+.rules-grid{display:grid;grid-template-columns:1fr;gap:22px}
+@media (min-width:1000px){.rules-grid{grid-template-columns:1.35fr .9fr}.sticky{position:sticky;top:22px;align-self:start}}
+.rule-card{padding:22px 24px}
+.rule-head{display:flex;align-items:baseline;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.ruleval{font-family:var(--disp);font-weight:600;font-size:34px;line-height:1;font-variant-numeric:tabular-nums}
+.stepper{display:grid;grid-template-columns:44px 1fr 44px;gap:14px;align-items:center;margin-top:18px}
+.stepbtn{width:44px;height:44px;padding:0;border-radius:12px;font-size:20px;line-height:1;box-shadow:3px 3px 0 var(--ink);display:grid;place-items:center}
+.stepbtn:hover{transform:translateY(-1px);box-shadow:4px 4px 0 var(--ink)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:14px;background:var(--cream);border:3px solid var(--ink);border-radius:999px;outline:none}
+input[type=range]:focus-visible{outline:3px solid var(--pool);outline-offset:3px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;border-radius:50%;background:var(--butter);border:3px solid var(--ink);box-shadow:2px 2px 0 var(--ink);cursor:grab}
+input[type=range]::-webkit-slider-thumb:active{cursor:grabbing}
+.exact{font-size:12.5px;color:var(--ink-mute);margin-top:10px}
+.exact .mono{color:var(--ink)}
+
+.seller-list{margin-top:8px}
+.seller{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:12px 0;border-bottom:2px dashed var(--ink-mute)}
+.seller:last-child{border-bottom:none}
+.sdot{width:14px;height:14px;border-radius:50%;background:var(--pool);border:2px solid var(--ink)}
+.seller b{font-family:var(--disp);font-weight:600;font-size:15px;display:block}
+.seller .mono{font-size:11.5px;color:var(--ink-mute)}
+.seller .swhat{font-size:12px;color:var(--ink-soft);display:block;margin-top:2px}
+.seller-empty{font-family:var(--disp);font-weight:600;font-size:13.5px;color:var(--tomato);padding:12px 0}
+.addrow{display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:16px}
+.addrow input{font-family:var(--mono);font-size:13px;color:var(--ink);background:var(--cream);border:3px solid var(--ink);border-radius:12px;padding:11px 12px;width:100%}
+.addrow input:focus{outline:3px solid var(--pool);outline-offset:2px}
+.addrow input.bad{animation:wobble .3s;border-color:var(--tomato)}
+
+.pline{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;padding:9px 0;border-bottom:2px dashed var(--ink-mute);font-size:14px}
+.pline:last-of-type{border-bottom:none}
+.dotc{width:12px;height:12px;border-radius:50%;border:2px solid var(--ink);margin-top:5px}
+.d-leaf{background:var(--leaf)} .d-butter{background:var(--butter)} .d-tomato{background:var(--tomato)}
+.warn{font-family:var(--disp);font-weight:600;font-size:13px;color:var(--ink);margin-top:12px;border:2px solid var(--tomato);border-radius:10px;padding:8px 12px;background:#F6C0B0}
+
+.exrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:2px dashed var(--ink-mute);font-size:14px}
+.exrow .rchip{min-width:120px;text-align:center}
+.exrow:last-child{border-bottom:none}
+.weekrow{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.weekrow .mono{font-size:12.5px;color:var(--ink-soft)}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <span class="mark">
+    <svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="#FCF6E9" stroke-width="3"/><circle cx="17" cy="7" r="3" fill="#F04E23"/></svg>
+    <span class="slot">your build</span>
+  </span>
+  <nav class="tabs">
+    <a class="tab" href="mock-v2-home.html">Home</a>
+    <a class="tab on" href="mock-v2-rules.html">Rules</a>
+    <a class="tab" href="mock-v2-receipts.html">Receipts</a>
+  </nav>
+  <span class="spacer"></span>
+  <span class="ident"><span class="avatar">Y</span><span class="email">you@…</span></span>
+  <button class="signout" onclick="toast('signed out (demo)','t-butter')">Sign out</button>
+</header>
+
+<main class="page">
+  <div class="pagehead pop">
+    <div>
+      <span class="kicker">your limits</span>
+      <h1>Rules</h1>
+      <p class="lede-sm">Plain limits, checked by the network. The agent cannot change them. Only you can.</p>
+    </div>
+  </div>
+
+  <div class="rules-grid">
+    <div class="stack">
+
+      <section class="card rule-card pop" style="--d:.04s">
+        <div class="rule-head">
+          <span class="kicker">cap per purchase</span>
+          <span class="ruleval" id="capOut">$2.00</span>
+        </div>
+        <p class="note">Anything above this is refused, every time.</p>
+        <div class="stepper">
+          <button class="stepbtn" onclick="bump('cap',-0.5)" aria-label="Lower the per purchase cap">−</button>
+          <input type="range" id="cap" min="0.5" max="10" step="0.5" value="2" aria-label="Cap per purchase in dollars">
+          <button class="stepbtn" onclick="bump('cap',0.5)" aria-label="Raise the per purchase cap">+</button>
+        </div>
+        <div class="exact">exactly <span class="mono" id="capNear">0.40</span> NEAR at $5.00 per NEAR</div>
+      </section>
+
+      <section class="card rule-card pop" style="--d:.10s">
+        <div class="rule-head">
+          <span class="kicker">auto-approve under</span>
+          <span class="ruleval" id="autoOut">$0.40</span>
+        </div>
+        <p class="note">Under this, the agent pays on its own. Above it, purchases wait for your OK.</p>
+        <div class="stepper">
+          <button class="stepbtn" onclick="bump('auto',-0.1)" aria-label="Lower the auto-approve limit">−</button>
+          <input type="range" id="auto" min="0.1" max="5" step="0.1" value="0.4" aria-label="Auto approve limit in dollars">
+          <button class="stepbtn" onclick="bump('auto',0.1)" aria-label="Raise the auto-approve limit">+</button>
+        </div>
+        <div class="exact">exactly <span class="mono" id="autoNear">0.08</span> NEAR at $5.00 per NEAR</div>
+      </section>
+
+      <section class="card rule-card pop" style="--d:.16s">
+        <div class="rule-head">
+          <span class="kicker">weekly budget</span>
+          <span class="ruleval" id="budgetOut">$2.00</span>
+        </div>
+        <p class="note">The most the agent can spend in one week. Resets Monday morning.</p>
+        <div class="stepper">
+          <button class="stepbtn" onclick="bump('budget',-0.5)" aria-label="Lower the weekly budget">−</button>
+          <input type="range" id="budget" min="0.5" max="20" step="0.5" value="2" aria-label="Weekly budget in dollars">
+          <button class="stepbtn" onclick="bump('budget',0.5)" aria-label="Raise the weekly budget">+</button>
+        </div>
+        <div class="exact">exactly <span class="mono" id="budgetNear">0.40</span> NEAR at $5.00 per NEAR</div>
+      </section>
+
+      <section class="card rule-card pop" style="--d:.22s">
+        <div class="rule-head">
+          <span class="kicker">who your agent can pay</span>
+          <span class="chip c-pool" id="sellerCount">1 seller</span>
+        </div>
+        <p class="note">Only the people and shops on this list can be paid. Anyone else is refused.</p>
+        <div class="seller-list" id="sellers">
+          <div class="seller">
+            <span class="sdot"></span>
+            <div><b>Northstar Data</b><span class="mono">northstar.testnet</span><span class="swhat">sells market data and research</span></div>
+            <button class="b-link" onclick="removeSeller(this)">remove</button>
+          </div>
+        </div>
+        <div class="addrow">
+          <input id="newSeller" placeholder="shop.testnet" autocomplete="off" spellcheck="false">
+          <button onclick="addSeller()">Add</button>
+        </div>
+        <p class="fine">Adding someone takes effect after you save.</p>
+      </section>
+
+    </div>
+
+    <aside class="stack sticky">
+      <section class="card pop" style="--d:.08s">
+        <span class="kicker">what this will do</span>
+        <div class="pline"><span class="dotc d-leaf"></span><span>Under <b id="pvAuto">$0.40</b>: pays itself.</span></div>
+        <div class="pline"><span class="dotc d-butter"></span><span>From <b id="pvAuto2">$0.40</b> to <b id="pvCap">$2.00</b>: waits for your OK.</span></div>
+        <div class="pline"><span class="dotc d-tomato"></span><span>Over <b id="pvCap2">$2.00</b>: refused.</span></div>
+        <div class="pline"><span class="dotc d-tomato"></span><span>Anyone not on your list: refused.</span></div>
+        <p class="warn" id="warn" hidden>Auto-approve cannot be above your per purchase cap. We will pull it down when you save.</p>
+      </section>
+
+      <section class="card pop" style="--d:.14s">
+        <span class="kicker">try it</span>
+        <p class="note" style="margin-top:8px">Three example purchases, checked against your rules right now.</p>
+        <div class="exrow"><span>$0.10 market data</span><span class="rchip c-leaf" id="ex1">pays itself</span></div>
+        <div class="exrow"><span>$1.00 research report</span><span class="rchip c-butter" id="ex2">waits for you</span></div>
+        <div class="exrow"><span>$2.50 premium feed</span><span class="rchip c-tomato" id="ex3">refused</span></div>
+      </section>
+
+      <section class="card pop" style="--d:.20s">
+        <div class="weekrow">
+          <span class="kicker">spent this week</span>
+          <span class="mono" id="weekLabel">$1.10 of $2.00</span>
+        </div>
+        <div class="meter"><div class="fill m-butter" id="weekFill"></div></div>
+        <p class="note" id="weekNote">Leaves $0.90 for the rest of the week.</p>
+        <button class="b-butter b-big" style="width:100%;margin-top:18px" onclick="save()">Save my rules</button>
+        <p class="fine">You sign once. Changes land on the network.</p>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<div id="toasts"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const state = { cap: 2, auto: 0.4, budget: 2, spent: 1.1 };
+const perNear = 5;
+const money = v => '$' + Number(v).toFixed(2);
+const near = v => (Number(v) / perNear).toFixed(2);
+
+function toast(msg, cls){
+  const t = document.createElement('div');
+  t.className = 'toast ' + (cls || '');
+  t.textContent = msg;
+  $('toasts').appendChild(t);
+  setTimeout(()=>{ t.style.transition='opacity .3s'; t.style.opacity='0'; setTimeout(()=>t.remove(),320); }, 2400);
+}
+
+function paintSlider(input){
+  const min = parseFloat(input.min), max = parseFloat(input.max), v = parseFloat(input.value);
+  const pct = ((v - min) / (max - min)) * 100;
+  input.style.background = 'linear-gradient(to right, var(--butter) 0 ' + pct + '%, var(--cream) ' + pct + '% 100%)';
+}
+function update(){
+  $('capOut').textContent = money(state.cap);
+  $('autoOut').textContent = money(state.auto);
+  $('budgetOut').textContent = money(state.budget);
+  $('capNear').textContent = near(state.cap);
+  $('autoNear').textContent = near(state.auto);
+  $('budgetNear').textContent = near(state.budget);
+  $('cap').value = state.cap;
+  $('auto').value = state.auto;
+  $('budget').value = state.budget;
+  ['cap','auto','budget'].forEach(id => paintSlider($(id)));
+
+  $('pvAuto').textContent = money(state.auto);
+  $('pvAuto2').textContent = money(state.auto);
+  $('pvCap').textContent = money(state.cap);
+  $('pvCap2').textContent = money(state.cap);
+  $('warn').hidden = state.auto <= state.cap;
+
+  verdict($('ex1'), 0.10);
+  verdict($('ex2'), 1.00);
+  verdict($('ex3'), 2.50);
+
+  const pct = Math.min(1, state.spent / state.budget);
+  const fill = $('weekFill');
+  fill.style.width = (pct * 100) + '%';
+  fill.className = 'fill ' + (pct < 0.5 ? 'm-leaf' : pct < 0.8 ? 'm-butter' : 'm-tomato');
+  $('weekLabel').textContent = money(state.spent) + ' of ' + money(state.budget);
+  $('weekNote').textContent = state.spent > state.budget
+    ? 'Over budget. New purchases are refused until Monday.'
+    : 'Leaves ' + money(state.budget - state.spent) + ' for the rest of the week.';
+}
+function verdict(el, amount){
+  if(amount <= state.auto){ el.className = 'rchip c-leaf'; el.textContent = 'pays itself'; }
+  else if(amount <= state.cap){ el.className = 'rchip c-butter'; el.textContent = 'waits for you'; }
+  else { el.className = 'rchip c-tomato'; el.textContent = 'refused'; }
+}
+function bump(field, delta){
+  const input = $(field);
+  const min = parseFloat(input.min), max = parseFloat(input.max);
+  state[field] = Math.min(max, Math.max(min, Math.round((state[field] + delta) * 10) / 10));
+  update();
+}
+['cap','auto','budget'].forEach(id => {
+  $(id).addEventListener('input', e => { state[id] = parseFloat(e.target.value); update(); });
+});
+function addSeller(){
+  const inp = $('newSeller');
+  const name = inp.value.trim();
+  if(!name){ inp.classList.add('bad'); inp.focus(); setTimeout(()=>inp.classList.remove('bad'), 400); return; }
+  const empty = document.querySelector('.seller-empty');
+  if(empty) empty.remove();
+  const row = document.createElement('div');
+  row.className = 'seller';
+  const b = document.createElement('b'); b.textContent = name;
+  const mono = document.createElement('span'); mono.className = 'mono'; mono.textContent = 'added just now';
+  const info = document.createElement('div');
+  info.appendChild(b); info.appendChild(mono);
+  const dot = document.createElement('span'); dot.className = 'sdot';
+  const rm = document.createElement('button'); rm.className = 'b-link'; rm.textContent = 'remove'; rm.onclick = () => removeSeller(rm);
+  row.appendChild(dot); row.appendChild(info); row.appendChild(rm);
+  $('sellers').appendChild(row);
+  inp.value = '';
+  countSellers();
+  toast('Seller added (demo). Save to apply it.', 't-leaf');
+}
+function removeSeller(btn){
+  btn.closest('.seller').remove();
+  if(!$('sellers').querySelector('.seller')){
+    const p = document.createElement('p');
+    p.className = 'seller-empty';
+    p.textContent = 'No one yet. Every purchase will be refused until you add someone.';
+    $('sellers').appendChild(p);
+  }
+  countSellers();
+  toast('Seller removed (demo).', 't-butter');
+}
+function countSellers(){
+  const n = $('sellers').querySelectorAll('.seller').length;
+  $('sellerCount').textContent = n + (n === 1 ? ' seller' : ' sellers');
+}
+function save(){
+  if(state.auto > state.cap){
+    state.auto = state.cap;
+    toast('Auto-approve pulled down to your cap.', 't-butter');
+  } else {
+    toast('Rules saved (demo). You would sign once here.', 't-leaf');
+  }
+  update();
+}
+countSellers();
+update();
+</script>
+</body>
+</html>

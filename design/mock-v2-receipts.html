@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Soft Machine · Receipts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Rubik:wght@400;500&family=Azeret+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="soft.css">
+<style>
+.sumgrid{display:grid;grid-template-columns:1fr;gap:22px}
+@media (min-width:900px){.sumgrid{grid-template-columns:1.2fr .8fr .8fr}}
+.sumcard{padding:20px 22px}
+.sumcard .big{font-size:36px}
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin:24px 0 6px}
+.fchip{font-family:var(--disp);font-weight:600;font-size:13.5px;border:2px solid var(--ink);border-radius:999px;padding:6px 14px;background:var(--cream);box-shadow:2px 2px 0 var(--ink);cursor:pointer;display:inline-flex;gap:8px;align-items:center;transition:background-color .15s,color .15s}
+.fchip b{font-size:11.5px;background:var(--sand);border:2px solid var(--ink);border-radius:999px;padding:0 7px;line-height:1.5}
+.fchip:hover{transform:translateY(-1px)}
+.fchip.on{background:var(--ink);color:var(--cream)}
+.fchip.on b{background:var(--butter);color:var(--ink)}
+.ghead{font-family:var(--disp);font-weight:600;font-size:13px;color:var(--ink-mute);margin:22px 0 2px;letter-spacing:.04em}
+.bigrow{display:grid;grid-template-columns:52px 1.5fr .8fr auto auto;gap:16px;align-items:center;background:var(--cream);border:3px solid var(--ink);border-radius:14px;box-shadow:4px 4px 0 var(--ink);padding:13px 16px;margin-top:10px;transition:transform .12s,box-shadow .12s}
+.bigrow:hover{transform:translateY(-2px);box-shadow:5px 6px 0 var(--ink)}
+.bigrow .rid{font-family:var(--disp);font-weight:600;font-size:16px}
+.rmain b{font-family:var(--disp);font-weight:600;font-size:15.5px;display:block;line-height:1.25}
+.rmain span{font-size:13px;color:var(--ink-soft);display:block;margin-top:2px}
+.rnum b{font-family:var(--disp);font-weight:600;font-size:16px;display:block;text-align:right;font-variant-numeric:tabular-nums}
+.rnum .mono{font-size:11px;color:var(--ink-mute);display:block;text-align:right;margin-top:1px}
+.rmeta{text-align:right;font-family:var(--disp);font-weight:500;font-size:12px;color:var(--ink-mute)}
+.rmeta a{display:block;font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);text-decoration:none;border-bottom:1px dotted var(--ink-mute);margin-top:2px}
+.rmeta a:hover{color:var(--ink);border-color:var(--ink)}
+.empty{padding:38px 30px;text-align:center;align-items:center}
+.empty .big{font-size:44px;margin-top:8px}
+.more{text-align:center;margin:24px 0 8px}
+@media (max-width:760px){
+  .bigrow{grid-template-columns:44px 1fr auto;row-gap:6px}
+  .rmain{grid-column:2;grid-row:1}
+  .rnum{grid-column:3;grid-row:1}
+  .rchip{grid-column:2;grid-row:2}
+  .rmeta{grid-column:2/4;grid-row:3;text-align:left}
+  .rmeta a{display:inline-block;margin-left:8px}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <span class="mark">
+    <svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="#FCF6E9" stroke-width="3"/><circle cx="17" cy="7" r="3" fill="#F04E23"/></svg>
+    <span class="slot">your build</span>
+  </span>
+  <nav class="tabs">
+    <a class="tab" href="mock-v2-home.html">Home</a>
+    <a class="tab" href="mock-v2-rules.html">Rules</a>
+    <a class="tab on" href="mock-v2-receipts.html">Receipts</a>
+  </nav>
+  <span class="spacer"></span>
+  <span class="ident"><span class="avatar">Y</span><span class="email">you@…</span></span>
+  <button class="signout" onclick="toast('signed out (demo)','t-butter')">Sign out</button>
+</header>
+
+<main class="page">
+  <div class="pagehead pop">
+    <span class="kicker">the record</span>
+    <h1>Receipts</h1>
+    <p class="lede-sm">Every request, exactly as the network recorded it. Paid, waiting, refused. Nothing hidden.</p>
+  </div>
+
+  <div class="sumgrid">
+    <section class="card sumcard pop">
+      <span class="kicker">spent this week <span class="sticker">test money</span></span>
+      <div class="big">$1.10</div>
+      <div class="meter mini"><div class="fill m-butter" style="width:55%"></div></div>
+      <div class="sub">of $2.00. Resets Monday morning.</div>
+    </section>
+    <section class="card sumcard pop" style="--d:.06s">
+      <span class="kicker">requests</span>
+      <div class="big">6</div>
+      <div class="sub">since you opened the account</div>
+    </section>
+    <section class="card sumcard pop" style="--d:.12s">
+      <span class="kicker">refused</span>
+      <div class="big">2</div>
+      <div class="sub">all by your rules, not by luck</div>
+    </section>
+  </div>
+
+  <div class="filters pop" style="--d:.18s">
+    <button class="fchip on" data-filter="all">All <b>6</b></button>
+    <button class="fchip" data-filter="paid">Paid <b>4</b></button>
+    <button class="fchip" data-filter="waiting">Waiting <b>0</b></button>
+    <button class="fchip" data-filter="refused">Refused <b>2</b></button>
+  </div>
+
+  <div id="list">
+    <div class="rgroup">
+      <h3 class="ghead">Today</h3>
+
+      <article class="bigrow" data-status="paid">
+        <span class="rid">#6</span>
+        <div class="rmain"><b>Weekly market data</b><span>Northstar Data</span></div>
+        <div class="rnum"><b>$0.10</b><span class="mono">0.02 NEAR</span></div>
+        <span class="rchip c-leaf">paid on its own</span>
+        <div class="rmeta">2h ago<a href="#">CsFB…P8oR</a></div>
+      </article>
+
+      <article class="bigrow" data-status="paid">
+        <span class="rid">#5</span>
+        <div class="rmain"><b>Research report</b><span>Northstar Data</span></div>
+        <div class="rnum"><b>$1.00</b><span class="mono">0.20 NEAR</span></div>
+        <span class="rchip c-pool">you approved</span>
+        <div class="rmeta">2h ago<a href="#">8EUt…bYyf</a></div>
+      </article>
+
+      <article class="bigrow" data-status="refused">
+        <span class="rid">#4</span>
+        <div class="rmain"><b>Premium feed</b><span>Northstar Data</span></div>
+        <div class="rnum"><b>$2.50</b><span class="mono">0.50 NEAR</span></div>
+        <span class="rchip c-tomato">refused: over cap</span>
+        <div class="rmeta">2h ago<a href="#">EBbj…4U61</a></div>
+      </article>
+
+      <article class="bigrow" data-status="refused">
+        <span class="rid">#3</span>
+        <div class="rmain"><b>Unlisted seller</b><span>Proof Desk</span></div>
+        <div class="rnum"><b>$0.10</b><span class="mono">0.02 NEAR</span></div>
+        <span class="rchip c-tomato">refused: seller</span>
+        <div class="rmeta">3h ago<a href="#">7Qm2…dK9x</a></div>
+      </article>
+    </div>
+
+    <div class="rgroup">
+      <h3 class="ghead">Last week</h3>
+
+      <article class="bigrow" data-status="paid">
+        <span class="rid">#2</span>
+        <div class="rmain"><b>Weekly market data</b><span>Northstar Data</span></div>
+        <div class="rnum"><b>$0.10</b><span class="mono">0.02 NEAR</span></div>
+        <span class="rchip c-leaf">paid on its own</span>
+        <div class="rmeta">Mon<a href="#">4XrT…m2Pa</a></div>
+      </article>
+
+      <article class="bigrow" data-status="paid">
+        <span class="rid">#1</span>
+        <div class="rmain"><b>Research report</b><span>Northstar Data</span></div>
+        <div class="rnum"><b>$1.00</b><span class="mono">0.20 NEAR</span></div>
+        <span class="rchip c-pool">you approved</span>
+        <div class="rmeta">Mon<a href="#">9LwB…q7Vc</a></div>
+      </article>
+    </div>
+  </div>
+
+  <div class="empty card" id="empty" hidden>
+    <span class="kicker">nothing waiting</span>
+    <div class="big">All caught up.</div>
+    <p class="note">No requests are waiting for you. The agent has no open asks.</p>
+  </div>
+
+  <div class="more" id="more">
+    <button class="b-ghost" onclick="toast('Older receipts would load here (demo).','t-butter')">Show older receipts</button>
+  </div>
+</main>
+
+<div id="toasts"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+function toast(msg, cls){
+  const t = document.createElement('div');
+  t.className = 'toast ' + (cls || '');
+  t.textContent = msg;
+  $('toasts').appendChild(t);
+  setTimeout(()=>{ t.style.transition='opacity .3s'; t.style.opacity='0'; setTimeout(()=>t.remove(),320); }, 2400);
+}
+document.querySelectorAll('.fchip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.fchip').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    const filter = btn.dataset.filter;
+    const rows = document.querySelectorAll('.bigrow');
+    rows.forEach(r => {
+      r.hidden = !(filter === 'all' || r.dataset.status === filter);
+    });
+    document.querySelectorAll('.rgroup').forEach(g => {
+      const anyVisible = [...g.querySelectorAll('.bigrow')].some(r => !r.hidden);
+      g.hidden = !anyVisible;
+    });
+    $('empty').hidden = filter !== 'waiting';
+    $('list').hidden = filter === 'waiting';
+    $('more').hidden = filter === 'waiting';
+  });
+});
+</script>
+</body>
+</html>

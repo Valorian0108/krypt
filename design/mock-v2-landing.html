@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Soft Machine · Welcome</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Rubik:wght@400;500&family=Azeret+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="soft.css">
+<style>
+.hero{display:grid;grid-template-columns:1fr;gap:44px;padding:48px 0 34px;align-items:center}
+@media (min-width:980px){.hero{grid-template-columns:1.05fr .95fr;gap:64px;padding:72px 0 44px}}
+.hero-title{font-size:44px;line-height:1.06;letter-spacing:-.015em;margin-top:14px;max-width:12em}
+@media (min-width:980px){.hero-title{font-size:62px}}
+.hl{background:var(--butter);border:2px solid var(--ink);border-radius:10px;padding:0 8px;box-shadow:3px 3px 0 var(--ink);display:inline-block;transform:rotate(-1deg)}
+.cta{display:flex;gap:16px;align-items:center;margin-top:28px;flex-wrap:wrap}
+.demo-link{font-family:var(--disp);font-weight:600;font-size:15px;color:var(--ink);text-decoration:none;border-bottom:3px solid var(--tomato);padding-bottom:2px;transition:border-color .15s,color .15s}
+.demo-link:hover{border-color:var(--pool);color:var(--pool)}
+.fine{margin-top:18px}
+
+.visual{position:relative;max-width:470px;margin:0 auto;width:100%}
+.backcard{position:absolute;top:0;left:26px;right:-6px;background:var(--butter);border:var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 20px;transform:rotate(-3deg);z-index:1}
+.backcard .kicker{font-size:12px}
+.backcard .chips{margin-top:12px}
+.backcard .chip{font-size:12px;padding:4px 12px;background:var(--cream)}
+.frontcard{position:relative;margin-top:110px;background:var(--cream);border:var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 22px;transform:rotate(1.2deg);z-index:2}
+.mini-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px}
+.mline{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:11px 0;border-bottom:2px dashed var(--ink-mute)}
+.mline:last-of-type{border-bottom:none}
+.mname{font-family:var(--disp);font-weight:600;font-size:14px;line-height:1.2}
+.mamt{font-family:var(--disp);font-weight:600;font-size:15px;font-variant-numeric:tabular-nums}
+.mini-foot{margin-top:12px;padding-top:12px;border-top:2px solid var(--ink);font-size:12.5px;color:var(--ink-soft)}
+.mini-foot .mono{color:var(--ink);font-size:12px}
+
+.trust{display:grid;grid-template-columns:1fr;gap:22px;margin-top:14px}
+@media (min-width:840px){.trust{grid-template-columns:repeat(3,1fr)}}
+.trust h3{margin-top:10px}
+.trust .note{margin-top:8px}
+
+.how{margin-top:22px;padding:28px}
+.howgrid{display:grid;grid-template-columns:1fr;gap:22px;margin-top:18px}
+@media (min-width:800px){.howgrid{grid-template-columns:repeat(3,1fr)}}
+.howstep{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
+.stepnum{display:inline-grid;place-items:center;width:36px;height:36px;border:2px solid var(--ink);border-radius:50%;font-family:var(--disp);font-weight:600;font-size:16px;box-shadow:2px 2px 0 var(--ink)}
+.s1{background:var(--butter)} .s2{background:#BFE0DB} .s3{background:#BFE3CB}
+.howstep b{font-family:var(--disp);font-weight:600;font-size:16px;display:block}
+.howstep span.howcopy{font-size:14px;color:var(--ink-soft);display:block;margin-top:3px}
+
+.ctaband{margin-top:22px;border:var(--line);border-radius:var(--radius);background:var(--ink);color:var(--cream);padding:26px 28px;display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;box-shadow:6px 6px 0 var(--butter)}
+.ctaband h2{font-size:26px;max-width:16em}
+.ctaband p{font-size:14px;color:var(--mute-on-ink);margin-top:6px}
+
+.foot{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:28px 2px 44px;font-size:13px;color:var(--ink-mute)}
+.foot .mono{font-size:12px}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <span class="mark">
+    <svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="#FCF6E9" stroke-width="3"/><circle cx="17" cy="7" r="3" fill="#F04E23"/></svg>
+    <span class="slot">your build</span>
+  </span>
+  <span class="spacer"></span>
+  <button class="signout" onclick="location.href='mock-v2-setup.html'">Sign in</button>
+</header>
+
+<main class="page">
+
+  <section class="hero">
+    <div class="pop">
+      <span class="kicker">a spending account for your agent</span>
+      <h1 class="hero-title">Your agent can shop. It <span class="hl">cannot</span> drain you.</h1>
+      <p class="lede">Set limits in plain dollars. The agent asks, your rules answer, and every purchase leaves a receipt you can open.</p>
+      <div class="cta">
+        <button class="b-butter b-big" onclick="location.href='mock-v2-setup.html'">Sign in</button>
+        <a class="demo-link" href="mock-v2-home.html">See a demo account</a>
+      </div>
+      <p class="fine">Invite only while we test. One secure popup. No wallet setup.</p>
+    </div>
+
+    <div class="visual pop" style="--d:.12s">
+      <div class="backcard">
+        <span class="kicker">your rules</span>
+        <div class="chips">
+          <span class="chip">cap per purchase $2.00</span>
+          <span class="chip">auto-approve $0.40</span>
+          <span class="chip">one trusted seller</span>
+        </div>
+      </div>
+      <div class="frontcard lift">
+        <div class="mini-head">
+          <span class="kicker">last receipts</span>
+          <span class="sticker">test money</span>
+        </div>
+        <div class="mline"><span class="mname">Weekly market data</span><span class="mamt">$0.10</span><span class="rchip c-leaf">paid</span></div>
+        <div class="mline"><span class="mname">Research report</span><span class="mamt">$1.00</span><span class="rchip c-pool">you approved</span></div>
+        <div class="mline"><span class="mname">Premium feed</span><span class="mamt">$2.50</span><span class="rchip c-tomato">refused</span></div>
+        <div class="mini-foot">a sample account on the test network</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="trust">
+    <div class="card lift pop" style="--d:.18s">
+      <span class="kicker">a hard cap</span>
+      <h3>Above your limit, the account says no.</h3>
+      <p class="note">It does not matter what the agent was told. The limit lives in the account itself, not in the agent's instructions.</p>
+    </div>
+    <div class="card lift pop" style="--d:.24s">
+      <span class="kicker">who gets paid</span>
+      <h3>Only people you trust get paid.</h3>
+      <p class="note">Anyone else is refused before a single cent moves, even if the request looks harmless.</p>
+    </div>
+    <div class="card lift pop" style="--d:.30s">
+      <span class="kicker">receipts</span>
+      <h3>Every move leaves a receipt.</h3>
+      <p class="note">Paid, waiting, refused. The record lives on the network, and every row opens the real transaction.</p>
+    </div>
+  </section>
+
+  <section class="card how pop" style="--d:.36s">
+    <span class="kicker">how it works</span>
+    <div class="howgrid">
+      <div class="howstep">
+        <span class="stepnum s1">1</span>
+        <div><b>Set your limits once.</b><span class="howcopy">A cap per purchase, a weekly budget, and the sellers you trust.</span></div>
+      </div>
+      <div class="howstep">
+        <span class="stepnum s2">2</span>
+        <div><b>Let the agent shop.</b><span class="howcopy">Small purchases pay themselves. Everything else waits for you.</span></div>
+      </div>
+      <div class="howstep">
+        <span class="stepnum s3">3</span>
+        <div><b>Approve only what needs you.</b><span class="howcopy">One press, one signature, and the receipt is written.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="ctaband pop" style="--d:.42s">
+    <div>
+      <h2>Give your agent a leash.</h2>
+      <p>Test money, real checks. Your rules decide everything.</p>
+    </div>
+    <button class="b-butter b-big" onclick="location.href='mock-v2-setup.html'">Sign in</button>
+  </section>
+
+  <footer class="foot">
+    <span>Runs on the NEAR test network. The money is test money.</span>
+    <span class="mono">invite only · 2026</span>
+  </footer>
+
+</main>
+
+<div id="toasts"></div>
+</body>
+</html>

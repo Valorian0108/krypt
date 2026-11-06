@@ -1,0 +1,35 @@
+{
+  "name": "ring1",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Ring 1: a spending account for an AI agent, with limits the owner sets and approvals the owner signs.",
+  "scripts": {
+    "dev": "concurrently -k -n server,web -c green,cyan \"node --watch server/index.mjs\" \"vite\"",
+    "server": "node server/index.mjs",
+    "build": "tsc --noEmit && vite build",
+    "start": "node server/index.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fast-auth-near/browser-sdk": "1.4.2",
+    "@near-js/transactions": "2.5.1",
+    "@fast-auth-near/javascript-provider": "1.4.1",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "jose": "^6.1.0",
+    "near-api-js": "5.1.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "concurrently": "^9.2.1",
+    "typescript": "~7.0.2",
+    "vite": "^8.3.5",
+    "vite-plugin-node-polyfills": "^0.28.0"
+  }
+}

@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Soft Machine · Setup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Rubik:wght@400;500&family=Azeret+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="soft.css">
+<style>
+.setup-head{text-align:center;padding:30px 0 22px}
+.setup-head .lede-sm{margin-left:auto;margin-right:auto}
+.steps{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:22px}
+.step{display:inline-flex;align-items:center;gap:8px;font-family:var(--disp);font-weight:600;font-size:13px;border:2px solid var(--ink);border-radius:999px;padding:5px 14px 5px 6px;background:var(--cream);transition:background-color .3s}
+.step b{display:inline-grid;place-items:center;width:24px;height:24px;border:2px solid var(--ink);border-radius:50%;font-size:12px;background:var(--sand)}
+.step.on{background:var(--butter);box-shadow:2px 2px 0 var(--ink)}
+.step.on b{background:var(--cream)}
+.step.done{background:#BFE3CB}
+.step.done b{background:var(--leaf);color:var(--ink)}
+.setup-card{padding:30px}
+.state h2{margin-top:10px}
+.state .note{max-width:52ch}
+.progress{list-style:none;padding:0;margin:18px 0 0}
+.progress li{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:2px dashed var(--ink-mute);font-family:var(--disp);font-weight:600;font-size:15px}
+.progress li:last-child{border-bottom:none}
+.pstate{width:22px;height:22px;border-radius:50%;border:2px solid var(--ink);background:var(--cream);display:grid;place-items:center;font-size:12px;font-weight:600;flex:none}
+.pstate.running{background:var(--butter);animation:pulse 1s infinite}
+.pstate.done{background:var(--leaf);color:var(--ink)}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.18);opacity:.75}}
+.summary{margin-top:18px;border:3px solid var(--ink);border-radius:14px;padding:4px 16px;background:var(--sand)}
+.srow{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:2px dashed var(--ink-mute);font-size:14px}
+.srow:last-child{border-bottom:none}
+.srow span{color:var(--ink-soft)}
+.srow b{font-family:var(--disp);font-weight:600;text-align:right}
+.done-badge{width:64px;height:64px;border-radius:50%;background:var(--leaf);border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);display:grid;place-items:center;font-family:var(--disp);font-weight:600;font-size:30px;margin-bottom:6px}
+.balance-box{margin-top:18px;border:3px solid var(--ink);border-radius:14px;padding:18px;background:var(--sand)}
+.center{text-align:center}
+.overlay{position:fixed;inset:0;background:rgba(36,28,17,.58);display:grid;place-items:center;padding:22px;z-index:100}
+.popup{width:min(430px,100%);background:var(--cream);border:var(--line);border-radius:var(--radius);box-shadow:8px 8px 0 var(--ink);padding:26px;animation:popin .3s cubic-bezier(.2,.9,.3,1.15) both}
+.popup h3{margin-top:8px}
+.prow{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:2px dashed var(--ink-mute);font-size:13.5px}
+.prow span{color:var(--ink-soft)}
+.prow b{font-family:var(--disp);font-weight:600;text-align:right;font-size:13.5px}
+.popup .acts{margin-top:20px}
+.setup-foot{padding:8px 2px 44px}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <span class="mark">
+    <svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="#FCF6E9" stroke-width="3"/><circle cx="17" cy="7" r="3" fill="#F04E23"/></svg>
+    <span class="slot">your build</span>
+  </span>
+  <span class="spacer"></span>
+  <span class="ident"><span class="avatar">Y</span><span class="email">you@…</span></span>
+</header>
+
+<main class="page-narrow">
+  <div class="setup-head pop">
+    <span class="kicker">first run</span>
+    <h1>Let's make your spending account.</h1>
+    <p class="lede-sm">Three small steps. Your rules live in the account itself, and the agent gets a key that can only ask.</p>
+  </div>
+
+  <div class="steps pop" style="--d:.06s">
+    <span class="step on" id="stepper-1"><b>1</b> invite</span>
+    <span class="step" id="stepper-2"><b>2</b> build</span>
+    <span class="step" id="stepper-3"><b>3</b> approve</span>
+  </div>
+
+  <section class="card setup-card pop" style="--d:.12s">
+
+    <div class="state" id="state-invite">
+      <span class="kicker">step 1 · invite</span>
+      <h2>Enter your invite code</h2>
+      <p class="note">One use per code. Each code covers one account, paid for by the demo sponsor. No password after this, you sign in with one secure popup.</p>
+      <div class="field">
+        <label for="invite">Invite code</label>
+        <input id="invite" placeholder="RING1-XXXX-XXXX" autocomplete="off" spellcheck="false">
+      </div>
+      <p class="err" id="inviteErr" hidden>That code didn't work. Check the letters and try again.</p>
+      <div class="acts">
+        <button class="b-butter b-big" onclick="startBuild()">Continue</button>
+      </div>
+      <p class="fine">Any code works in this demo mock. Try <span class="mono">RING1-DEMO-0001</span>.</p>
+    </div>
+
+    <div class="state" id="state-build" hidden>
+      <span class="kicker">step 2 · build</span>
+      <h2>Building your account</h2>
+      <p class="note">This takes a few seconds. Keep this tab open, we will tell you when it needs you.</p>
+      <ul class="progress">
+        <li id="p1"><span class="pstate"></span><span>Funding your vault</span></li>
+        <li id="p2"><span class="pstate"></span><span>Creating the vault on the test network</span></li>
+        <li id="p3"><span class="pstate"></span><span>Securing the agent key</span></li>
+        <li id="p4"><span class="pstate"></span><span>Writing your rules</span></li>
+      </ul>
+    </div>
+
+    <div class="state" id="state-approve" hidden>
+      <span class="kicker">step 3 · approve</span>
+      <h2>One approval and you're in</h2>
+      <p class="note">We prepared one transaction. It sets up your agent and your rules. Approve it once in the secure window. There is no terminal and no seed phrase.</p>
+      <div class="summary">
+        <div class="srow"><span>Agent key</span><b>can ask to spend, nothing else</b></div>
+        <div class="srow"><span>Cap per purchase</span><b>$2.00</b></div>
+        <div class="srow"><span>Auto-approve under</span><b>$0.40</b></div>
+        <div class="srow"><span>Weekly budget</span><b>$2.00</b></div>
+        <div class="srow"><span>Who your agent can pay</span><b>none yet</b></div>
+      </div>
+      <p class="fine">Your agent cannot pay anyone until you add a person or shop on your Rules page.</p>
+      <div class="acts">
+        <button class="b-butter b-big" onclick="openPopup()">Approve in the secure window</button>
+      </div>
+      <p class="fine">You can change every rule later. The agent cannot change any of them.</p>
+    </div>
+
+    <div class="state" id="state-done" hidden>
+      <div class="done-badge">✓</div>
+      <span class="kicker">step 3 · done</span>
+      <h2>You're in.</h2>
+      <p class="note">Your account is live on the test network. Here is what is in it, and your rules decide who can touch it.</p>
+      <div class="balance-box">
+        <span class="kicker">available to spend <span class="sticker">test money</span></span>
+        <div class="big" style="font-size:48px;display:block;width:max-content">$14.00</div>
+        <div class="sub">exactly <span class="mono">2.8 NEAR</span>, funded by the demo sponsor</div>
+      </div>
+      <div class="acts">
+        <button class="b-butter b-big" onclick="location.href='mock-v2-home.html'">Open my home</button>
+      </div>
+      <p class="fine">Next: add a person or shop on Rules. Until then, every purchase is refused.</p>
+      <p class="fine">Demo note: this opens the sample account, which already has a seller and receipts. A real new account starts empty.</p>
+      <p class="fine">The agent holds a key that can ask. It can never approve itself.</p>
+    </div>
+
+  </section>
+
+  <p class="fine center pop" style="--d:.18s">Test network, test money. Nothing here touches real funds.</p>
+</main>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="popup">
+    <span class="kicker">secure sign in</span>
+    <h3>Approve this request?</h3>
+    <p class="note" style="margin-top:8px">This is the one popup. It signs the setup transaction for your account.</p>
+    <div class="prow"><span>Action</span><b>Create your agent key</b></div>
+    <div class="prow"><span>Scope</span><b>Ask to spend only</b></div>
+    <div class="prow"><span>Starting limits</span><b>$2.00 cap · $0.40 auto · $2.00 a week</b></div>
+    <div class="prow"><span>Who your agent can pay</span><b>none yet</b></div>
+    <div class="prow"><span>Network fee</span><b>paid by the demo sponsor</b></div>
+    <p class="fine">Your agent cannot pay anyone until you add a person or shop on Rules.</p>
+    <div class="acts">
+      <button class="b-leaf" onclick="approvePopup()">Approve</button>
+      <button class="b-ghost" onclick="closePopup()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+function toast(msg, cls){
+  const t = document.createElement('div');
+  t.className = 'toast ' + (cls || '');
+  t.textContent = msg;
+  $('toasts').appendChild(t);
+  setTimeout(()=>{ t.style.transition='opacity .3s'; t.style.opacity='0'; setTimeout(()=>t.remove(),320); }, 2400);
+}
+function setStep(n){
+  [1,2,3].forEach(i=>{
+    const el = $('stepper-' + i);
+    el.classList.toggle('on', i === n);
+    el.classList.toggle('done', i < n);
+    el.querySelector('b').textContent = i < n ? '✓' : i;
+  });
+}
+function show(id){
+  ['state-invite','state-build','state-approve','state-done'].forEach(s => $(s).hidden = s !== id);
+}
+function startBuild(){
+  const inp = $('invite');
+  if(!inp.value.trim()){
+    inp.classList.add('bad'); $('inviteErr').hidden = false; inp.focus();
+    return;
+  }
+  inp.classList.remove('bad'); $('inviteErr').hidden = true;
+  show('state-build'); setStep(2);
+  const items = [...document.querySelectorAll('.progress li')];
+  items.forEach(li=>{ li.classList.remove('done'); const s = li.querySelector('.pstate'); s.className = 'pstate'; s.textContent = ''; });
+  items[0].querySelector('.pstate').classList.add('running');
+  let i = 0;
+  const timer = setInterval(()=>{
+    items[i].classList.add('done');
+    const s = items[i].querySelector('.pstate');
+    s.className = 'pstate done'; s.textContent = '✓';
+    i++;
+    if(i < items.length){ items[i].querySelector('.pstate').classList.add('running'); }
+    else {
+      clearInterval(timer);
+      setTimeout(()=>{ show('state-approve'); setStep(3); }, 620);
+    }
+  }, 650);
+}
+function openPopup(){ $('overlay').hidden = false; }
+function closePopup(){ $('overlay').hidden = true; }
+function approvePopup(){
+  closePopup();
+  toast('Approved on the test network (demo).', 't-leaf');
+  setStep(4);
+  show('state-done');
+}
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closePopup(); });
+</script>
+</body>
+</html>

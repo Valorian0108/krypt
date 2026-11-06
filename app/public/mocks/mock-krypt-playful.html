@@ -1,0 +1,89 @@
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Krypt · Playful Wordmarks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Rubik:wght@400;500&family=Azeret+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; }
+body { background: var(--sand); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; padding: 40px 24px; }
+:root {
+  --ink: #241C11;
+  --sand: #EFE3CC;
+  --cream: #FCF6E9;
+  --tomato: #F04E23;
+  --butter: #FFB937;
+  --leaf: #4E9B62;
+  --pool: #2A9D8F;
+  --ink-soft: #6B5B45;
+  --ink-mute: #6E5F49;
+  --disp: Fredoka, system-ui, sans-serif;
+  --body: Rubik, system-ui, sans-serif;
+  --mono: Azeret Mono, ui-monospace, monospace;
+}
+.page { max-width: 980px; margin: 0 auto; }
+h1 { font-family: var(--disp); font-weight: 600; font-size: 34px; margin-bottom: 8px; letter-spacing: -0.5px; }
+.sub { font-family: var(--body); font-size: 15px; color: var(--ink-mute); margin-bottom: 48px; }
+.grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px; }
+@media (max-width: 640px) { .grid { grid-template-columns: 1fr; } body { padding: 24px 16px; } }
+
+.card { background: var(--cream); border: 2px solid var(--ink); border-radius: 14px; padding: 32px 24px; display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
+.card .name { font-family: var(--disp); font-weight: 600; font-size: 48px; letter-spacing: -2px; line-height: 1.0; }
+.card .name.bouncy { font-family: var(--disp); font-weight: 700; font-size: 56px; letter-spacing: -4px; line-height: 0.9; transform: rotate(-1deg); }
+.card .name.lower { font-family: var(--body); font-weight: 500; font-size: 44px; letter-spacing: 8px; line-height: 1.0; }
+.card .name.mono { font-family: var(--mono); font-weight: 500; font-size: 32px; letter-spacing: 6px; line-height: 1.0; }
+.card .name .tomato { color: var(--tomato); }
+.card .name .butter { color: var(--butter); }
+.card .name .leaf { color: var(--leaf); }
+.card .name .pool { color: var(--pool); }
+.card .ring { width: 48px; height: 48px; border: 4px solid var(--pool); border-radius: 50%; transform: rotate(12deg); }
+.card .with-ring { display: flex; gap: 16px; align-items: center; }
+.card .label { font-family: var(--disp); font-weight: 600; font-size: 13px; color: var(--ink-mute); text-transform: none; }
+.card .spec { font-family: var(--mono); font-weight: 500; font-size: 11px; color: var(--ink-soft); margin-top: 6px; }
+.foot { margin-top: 56px; font-family: var(--body); font-size: 13px; color: var(--ink-mute); border-top: 2px dashed var(--ink-mute); padding-top: 20px; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <h1>Krypt · Playful Wordmarks</h1>
+  <p class="sub">Same name, bouncier energy. Still one word. Still no shield, lock, or key.</p>
+
+  <div class="grid">
+    <div class="card">
+      <div class="name bouncy">KRYPT</div>
+      <div class="label">Fredoka 700 · ink, tilted slightly</div>
+      <div class="spec">Big, bouncy, off-center. Feels like a stamp, not a logo.</div>
+    </div>
+
+    <div class="card">
+      <div class="name lower">k<span class="butter">r</span>y<span class="leaf">p</span>t</div>
+      <div class="label">Rubik 500 · ink with butter and leaf</div>
+      <div class="spec">Spaced out, two accent colors. Playful but still readable.</div>
+    </div>
+
+    <div class="card">
+      <div class="name mono">K<span class="tomato">R</span>Y<span class="tomato">P</span>T</div>
+      <div class="label">Azeret Mono 500 · ink with tomato accents</div>
+      <div class="spec">Technical type, broken up by bright letters.</div>
+    </div>
+
+    <div class="card">
+      <div class="with-ring">
+        <div class="name">KRYPT</div>
+        <div class="ring"></div>
+      </div>
+      <div class="label">Fredoka 600 · ink plus tilted pool ring</div>
+      <div class="spec">The ring is not centered. It leans, like something you can open.</div>
+    </div>
+  </div>
+
+  <div class="foot">
+    Colors: ink #241C11 · sand #EFE3CC · cream #FCF6E9 · tomato #F04E23 · butter #FFB937 · leaf #4E9B62 · pool #2A9D8F
+  </div>
+</div>
+
+</body>
+</html>

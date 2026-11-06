@@ -34,8 +34,12 @@ use near_sdk::{
     env, near, require, AccountId, Gas, NearToken, PanicOnDefault, Promise, PromiseError,
 };
 
-/// Gas reserved for the private transfer-result callback.
-const CALLBACK_GAS: Gas = Gas::from_tgas(6);
+/// Gas reserved for the private transfer-result callback. The callback reads
+/// a receipt, writes it back, and emits a log. Six Tgas was enough for the
+/// happy path in unit tests but left almost no margin on chain, where a
+/// receipt write can cost more. Thirty Tgas covers the write with room to
+/// spare and is still small next to the transfer itself.
+const CALLBACK_GAS: Gas = Gas::from_tgas(30);
 
 /// Hard cap on receipt bytes, so one request cannot bloat state.
 const MAX_PURPOSE_BYTES: usize = 280;
@@ -386,6 +390,19 @@ impl PolicyVault {
             .budget_per_period
             .0
             .saturating_sub(self.spent_this_period);
+        // The rules can change between the queue and the approval. Re-check
+        // the two rules that made the spend legal in the first place: a
+        // payee removed from the allowlist, or a cap lowered below the
+        // queued amount, must stop the payout instead of riding an old
+        // decision past the owner's current intent.
+        require!(
+            self.allowlist.contains(&pending.payee),
+            "the payee is no longer on the allowlist, so it cannot be paid"
+        );
+        require!(
+            pending.amount <= self.rules.cap_per_spend.0,
+            "the amount is above the per-spend cap in the rules, so it cannot be paid"
+        );
         require!(
             pending.amount <= remaining,
             "the period budget ran out before this approval, so it cannot be paid"
@@ -401,7 +418,7 @@ impl PolicyVault {
             pending.amount <= spendable,
             "the vault does not hold that much spendable NEAR above its storage reserve"
         );
-        self.pending.remove(&receipt_id);
+        self.forget_pending(receipt_id);
         self.spent_this_period = self
             .spent_this_period
             .checked_add(pending.amount)
@@ -419,9 +436,10 @@ impl PolicyVault {
     pub fn refuse_spend(&mut self, receipt_id: ReceiptId) {
         self.assert_owner_one_yocto();
         require!(
-            self.pending.remove(&receipt_id).is_some(),
+            self.pending.contains_key(&receipt_id),
             "there is no pending spend with that receipt id"
         );
+        self.forget_pending(receipt_id);
         self.update_receipt(
             receipt_id,
             SpendStatus::OwnerRefused,
@@ -431,8 +449,17 @@ impl PolicyVault {
     }
 
     #[payable]
-    pub fn withdraw(&mut self, amount: U128) -> Promise {
+    pub fn withdraw(&mut self, amount: U128, to: AccountId) -> Promise {
         self.assert_owner_one_yocto();
+        // The vault account is the owner in this deployment, because the
+        // owner methods are signed by the login key that controls the vault.
+        // Sending to `self.owner` would therefore transfer the money to the
+        // vault itself and change nothing. The caller names the destination
+        // instead, and the vault refuses a transfer to itself.
+        require!(
+            to != env::current_account_id(),
+            "choose a different account; withdrawing to the vault itself would move nothing"
+        );
         // Keep enough to cover the contract's own storage, so the state
         // (rules and receipts) can never be stranded by a withdrawal.
         let reserved = storage_reserved();
@@ -446,7 +473,7 @@ impl PolicyVault {
             "withdrawing that much would leave the vault below its storage reserve"
         );
         env::log_str("the owner withdrew NEAR from the vault");
-        Promise::new(self.owner.clone()).transfer(NearToken::from_yoctonear(amount.0))
+        Promise::new(to).transfer(NearToken::from_yoctonear(amount.0))
     }
 
     // ------------------------------------------------------------------
@@ -681,6 +708,26 @@ impl PolicyVault {
             .copied()
             .filter(|id| self.pending.contains_key(id))
             .collect()
+    }
+
+    /// Remove a resolved spend from both the queue and the order log. The
+    /// order vector used to be append-only, so every queued spend left an
+    /// id behind forever and `get_pending` filtered over the whole history.
+    /// The order vector now holds only live ids. `swap_remove` keeps that
+    /// cost O(1); the remaining order is not part of the contract's
+    /// promises, and `get_pending` is read as a set of open items.
+    fn forget_pending(&mut self, receipt_id: ReceiptId) -> Option<PendingSpend> {
+        let pending = self.pending.remove(&receipt_id);
+        if pending.is_some() {
+            let position = self
+                .pending_order
+                .iter()
+                .position(|id| *id == receipt_id);
+            if let Some(index) = position {
+                self.pending_order.swap_remove(index as u32);
+            }
+        }
+        pending
     }
 
     fn record(
@@ -967,14 +1014,76 @@ mod tests {
         let mut c = setup();
         owner_env(T0);
         // Withdrawing a sane amount works and returns a promise.
-        let _ = c.withdraw(U128(NEAR));
+        let _ = c.withdraw(U128(NEAR), good());
         // Withdrawing everything must fail: the state must stay funded.
         owner_env(T0);
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
             let mut c = c;
-            let _ = c.withdraw(U128(1000 * NEAR));
+            let _ = c.withdraw(U128(1000 * NEAR), good());
         }));
         assert!(result.is_err(), "withdrawing the reserve must panic");
+    }
+
+    #[test]
+    fn withdraw_to_the_vault_itself_is_refused() {
+        // The vault is its own owner in the live deployment, so the old
+        // `transfer(self.owner)` moved the money back to the vault and did
+        // nothing. The destination is now explicit, and the no-op case is a
+        // loud failure instead of a silent success.
+        let c = setup();
+        owner_env(T0);
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            let mut c = c;
+            let _ = c.withdraw(U128(NEAR), vault());
+        }));
+        assert!(result.is_err(), "withdrawing to the vault must panic");
+    }
+
+    #[test]
+    fn pending_order_is_pruned_when_a_spend_resolves() {
+        let mut c = setup();
+        let first = agent_ask(&mut c, good(), 8 * NEAR / 10, T0);
+        let second = agent_ask(&mut c, good(), 7 * NEAR / 10, T0);
+        assert_eq!(c.pending_order.len(), 2);
+
+        owner_env(T0);
+        c.approve_spend(first.id);
+        assert_eq!(c.pending_order.len(), 1);
+        assert_eq!(c.get_pending().len(), 1);
+        assert_eq!(c.get_pending()[0].receipt_id, second.id);
+
+        owner_env(T0);
+        c.refuse_spend(second.id);
+        assert_eq!(c.pending_order.len(), 0);
+        assert_eq!(c.get_pending().len(), 0);
+    }
+
+    #[test]
+    #[should_panic(expected = "no longer on the allowlist")]
+    fn approval_rechecks_the_allowlist() {
+        // The payee was allowed when the spend was queued, then removed.
+        // An approval must not ride the old decision past the new list.
+        let mut c = setup();
+        let r = agent_ask(&mut c, good(), 8 * NEAR / 10, T0);
+        owner_env(T0);
+        c.remove_payee(good());
+        owner_env(T0);
+        c.approve_spend(r.id);
+    }
+
+    #[test]
+    #[should_panic(expected = "above the per-spend cap")]
+    fn approval_rechecks_the_cap() {
+        // Same race for the cap: the owner lowered it after the queue.
+        let mut c = setup();
+        let r = agent_ask(&mut c, good(), 8 * NEAR / 10, T0);
+        owner_env(T0);
+        let mut tighter = normal_rules();
+        tighter.cap_per_spend = U128(NEAR / 2);
+        tighter.auto_limit = U128(NEAR / 4);
+        c.set_rules(tighter);
+        owner_env(T0);
+        c.approve_spend(r.id);
     }
 
     // ------------------------------------------------------------------
@@ -1256,7 +1365,7 @@ mod tests {
     fn attacker_stranger_cannot_withdraw() {
         let mut c = setup();
         set_env(&intruder(), 1, T0);
-        let _ = c.withdraw(U128(NEAR));
+        let _ = c.withdraw(U128(NEAR), good());
     }
 
     #[test]

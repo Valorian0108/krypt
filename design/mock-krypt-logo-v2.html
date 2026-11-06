@@ -1,0 +1,252 @@
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Krypt · Logo System v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Rubik:wght@400;500&family=Azeret+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; }
+body { background: var(--sand); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; padding: 24px; }
+:root {
+  --ink: #241C11;
+  --sand: #EFE3CC;
+  --cream: #FCF6E9;
+  --tomato: #F04E23;
+  --butter: #FFB937;
+  --leaf: #4E9B62;
+  --pool: #2A9D8F;
+  --ink-soft: #6B5B45;
+  --ink-mute: #6E5F49;
+  --disp: Fredoka, system-ui, sans-serif;
+  --body: Rubik, system-ui, sans-serif;
+  --mono: Azeret Mono, ui-monospace, monospace;
+}
+.page { max-width: 1100px; margin: 0 auto; }
+h1 { font-family: var(--disp); font-weight: 600; font-size: 30px; margin-bottom: 8px; letter-spacing: -0.5px; }
+.sub { font-family: var(--body); font-size: 15px; color: var(--ink-mute); margin-bottom: 40px; }
+
+/* Section layout */
+.section { margin-bottom: 56px; }
+.section h2 { font-family: var(--disp); font-weight: 600; font-size: 20px; margin-bottom: 16px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+@media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+
+/* Mark grid sheet */
+.mark-sheet { background: var(--ink); border-radius: 14px; padding: 32px; position: relative; overflow: hidden; }
+.mark-grid { position: relative; width: 260px; height: 260px; margin: 0 auto 24px auto; }
+.grid-line { position: absolute; background: rgba(252,246,233,0.15); }
+.grid-v { width: 2px; height: 100%; left: 50%; transform: translateX(-50%); }
+.grid-h { width: 100%; height: 2px; top: 50%; transform: translateY(-50%); }
+.grid-diag { width: 2px; height: 100%; left: 25%; }
+.grid-diag2 { width: 2px; height: 100%; left: 75%; }
+
+.mark-svg { width: 200px; height: 200px; margin: 0 auto; display: block; }
+.mark-svg svg { width: 100%; height: 100%; display: block; }
+.mark-svg .ring { stroke: var(--cream); stroke-width: 12; fill: none; stroke-linecap: round; transform-origin: 100px 100px; }
+.mark-svg .seal { fill: var(--cream); transform-origin: 100px 100px; }
+
+/* Header lockup */
+.header-lockup { background: var(--ink); border-radius: 14px; padding: 18px 24px; display: flex; align-items: center; gap: 16px; inline-size: fit-content; }
+.header-lockup .mark { width: 40px; height: 40px; }
+.header-lockup .mark svg { width: 100%; height: 100%; display: block; }
+.header-lockup .ring { stroke: var(--cream); stroke-width: 8; fill: none; stroke-linecap: round; transform-origin: 20px 20px; }
+.header-lockup .seal { fill: var(--cream); transform-origin: 20px 20px; }
+.header-lockup .wordmark { font-family: var(--disp); font-weight: 600; font-size: 22px; color: var(--cream); letter-spacing: -1px; white-space: nowrap; }
+
+/* Card */
+.card { background: var(--cream); border: 2px solid var(--ink); border-radius: 14px; padding: 24px; }
+.card h3 { font-family: var(--disp); font-weight: 600; font-size: 16px; margin-bottom: 8px; }
+.card p { font-family: var(--mono); font-size: 11px; color: var(--ink-mute); margin: 0; line-height: 1.5; }
+
+/* Sizes */
+.sizes-row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.size-block { width: 56px; height: 56px; background: var(--ink); border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative; }
+.size-block .mark { width: 24px; height: 24px; }
+.size-block .mark svg { width: 100%; height: 100%; }
+.size-block .ring { stroke: var(--cream); stroke-width: 6; fill: none; stroke-linecap: round; transform-origin: 12px 12px; }
+.size-block .seal { fill: var(--cream); transform-origin: 12px 12px; }
+.size-label { font-family: var(--mono); font-size: 10px; color: var(--ink-mute); margin-top: 6px; }
+
+/* Motion */
+.motion-card { background: var(--ink); border-radius: 14px; padding: 32px; display: flex; align-items: center; justify-content: center; gap: 24px; }
+.motion-card .mark { width: 80px; height: 80px; }
+.motion-card .mark svg { width: 100%; height: 100%; }
+.motion-card .ring { stroke: var(--cream); stroke-width: 10; fill: none; stroke-linecap: round; transform-origin: 40px 40px; animation: ringPulse 3s ease-in-out infinite; }
+.motion-card .seal { fill: var(--cream); transform-origin: 40px 40px; animation: sealDrift 3s ease-in-out infinite; }
+@keyframes ringPulse {
+  0%, 100% { transform: scale(1); stroke-dashoffset: 0; }
+  50% { transform: scale(1.04); stroke-dashoffset: 2; }
+}
+@keyframes sealDrift {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 1; }
+  50% { transform: translate(4px, -4px) scale(1.1); opacity: 0.85; }
+}
+.motion-label { font-family: var(--disp); font-weight: 600; font-size: 15px; color: var(--cream); white-space: nowrap; }
+
+/* Clear space */
+.clear-space { background: var(--cream); border: 2px solid var(--ink); border-radius: 14px; padding: 24px; position: relative; }
+.clear-space .mark { width: 48px; height: 48px; margin: 0 auto 16px auto; }
+.clear-space .mark svg { width: 100%; height: 100%; }
+.clear-space .ring { stroke: var(--ink); stroke-width: 10; fill: none; stroke-linecap: round; transform-origin: 24px 24px; }
+.clear-space .seal { fill: var(--ink); transform-origin: 24px 24px; }
+.clear-zone { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 200px; height: 200px; border: 2px dashed var(--ink-mute); border-radius: 50%; pointer-events: none; }
+
+.spec-box { background: var(--cream); border: 1px solid var(--ink-mute); border-radius: 10px; padding: 16px; font-family: var(--mono); font-size: 11px; color: var(--ink-mute); margin-top: 12px; }
+.spec-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+
+.foot { margin-top: 48px; font-family: var(--body); font-size: 13px; color: var(--ink-mute); border-top: 2px dashed var(--ink-mute); padding-top: 20px; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <h1>Krypt · Logo System v2</h1>
+  <p class="sub">Technical design sheet. Built on a grid. No crypto imagery.</p>
+
+  <!-- Section 1: Mark construction -->
+  <div class="section">
+    <h2>1. Mark construction</h2>
+    <div class="grid-2">
+      <div class="mark-sheet">
+        <div class="mark-grid">
+          <div class="grid-line grid-v"></div>
+          <div class="grid-line grid-h"></div>
+          <div class="grid-line grid-diag"></div>
+          <div class="grid-line grid-diag2"></div>
+        </div>
+        <div class="mark-svg">
+          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <path class="ring" d="M 30 100 A 70 70 0 0 1 170 100"/>
+            <circle class="seal" cx="50" cy="100" r="14"/>
+          </svg>
+        </div>
+        <div class="card">
+          <h3>Geometry</h3>
+          <p>Outer ring: 200×200 unit circle, arc from 9 o'clock to 3 o'clock.<br>Stroke: 12 units, cream on ink.<br>Seal: solid circle, 28-unit diameter, pressed to the inner left edge of the ring.<br>The gap on the right is where the vault opens.</p>
+        </div>
+      </div>
+
+      <div>
+        <div class="header-lockup">
+          <div class="mark">
+            <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+              <path class="ring" d="M 6 20 A 14 14 0 0 1 34 20"/>
+              <circle class="seal" cx="10" cy="20" r="3"/>
+            </svg>
+          </div>
+          <div class="wordmark">KRYPT</div>
+        </div>
+        <div class="card" style="margin-top: 20px;">
+          <h3>Header lockup</h3>
+          <p>Ink background #241C11. Cream wordmark Fredoka 600. Cream ring outline. Clear space equals the seal diameter on all sides.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Sizes -->
+  <div class="section">
+    <h2>2. Size variants</h2>
+    <div class="sizes-row">
+      <div>
+        <div class="size-block ink">
+          <div class="mark">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path class="ring" d="M 4 12 A 8 8 0 0 1 20 12"/>
+              <circle class="seal" cx="6" cy="12" r="2"/>
+            </svg>
+          </div>
+        </div>
+        <div class="size-label">16px · favicon</div>
+      </div>
+      <div>
+        <div class="size-block ink">
+          <div class="mark">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path class="ring" d="M 4 12 A 8 8 0 0 1 20 12"/>
+              <circle class="seal" cx="6" cy="12" r="2"/>
+            </svg>
+          </div>
+        </div>
+        <div class="size-label">24px · tab icon</div>
+      </div>
+      <div>
+        <div class="size-block ink">
+          <div class="mark">
+            <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+              <path class="ring" d="M 6 20 A 14 14 0 0 1 34 20"/>
+              <circle class="seal" cx="10" cy="20" r="3"/>
+            </svg>
+          </div>
+        </div>
+        <div class="size-label">32px · header</div>
+      </div>
+      <div>
+        <div class="size-block ink">
+          <div class="mark">
+            <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+              <path class="ring" d="M 12 40 A 28 28 0 0 1 68 40"/>
+              <circle class="seal" cx="20" cy="40" r="6"/>
+            </svg>
+          </div>
+        </div>
+        <div class="size-label">64px · large</div>
+      </div>
+    </div>
+    <div class="spec-box">
+      <div class="spec-row"><span>Smallest usable size</span><span>16px</span></div>
+      <div class="spec-row"><span>Clear space</span><span>1× seal diameter</span></div>
+      <div class="spec-row"><span>Background</span><span>ink #241C11 only</span></div>
+      <div class="spec-row"><span>Mark color</span><span>cream #FCF6E9</span></div>
+    </div>
+  </div>
+
+  <!-- Section 3: Clear space -->
+  <div class="section grid-2">
+    <div class="clear-space">
+      <div class="clear-zone"></div>
+      <div class="mark">
+        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <path class="ring" d="M 12 24 A 12 12 0 0 1 36 24"/>
+          <circle class="seal" cx="16" cy="24" r="4"/>
+        </svg>
+      </div>
+      <div class="card" style="margin-top: auto;">
+        <h3>Clear space</h3>
+        <p>No other element may enter the dashed circle. Radius equals the seal diameter measured from the mark center.</p>
+      </div>
+    </div>
+    <div class="card">
+      <h3>What this is not</h3>
+      <p>No coin. No chain. No key. No lock. No triangle. No pyramid. No glowing circle. Nothing that reads as cryptocurrency. The seal is a vault door, not a token.</p>
+    </div>
+  </div>
+
+  <!-- Section 4: Motion -->
+  <div class="section">
+    <h2>3. Motion state</h2>
+    <div class="motion-card">
+      <div class="mark">
+        <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+          <path class="ring" d="M 12 40 A 28 28 0 0 1 68 40" stroke-dasharray="176" stroke-dashoffset="0"/>
+          <circle class="seal" cx="20" cy="40" r="6"/>
+        </svg>
+      </div>
+      <div class="motion-label">Seal pulses when a purchase waits for your approval</div>
+    </div>
+    <div class="card" style="margin-top: 24px;">
+      <h3>Behavior</h3>
+      <p>Idle: seal rests against the inner ring edge.<br>Pending: seal drifts up and left, ring pulses slightly.<br>Approved: seal breaks away from the ring entirely (handled in app code, not CSS).<br>CSS animation only. No video. No glassmorphism.</p>
+    </div>
+  </div>
+
+  <div class="foot">
+    Colors: ink #241C11 · sand #EFE3CC · cream #FCF6E9 · tomato #F04E23 · butter #FFB937 · leaf #4E9B62 · pool #2A9D8F<br>
+    Type: Fredoka 600 for wordmark. No em dashes. No crypto imagery.
+  </div>
+</div>
+
+</body>
+</html>

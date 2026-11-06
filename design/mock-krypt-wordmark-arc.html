@@ -1,0 +1,289 @@
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Krypt · Wordmark + Arc</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Rubik:wght@400;500&family=Azeret+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; }
+body { background: var(--sand); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; padding: 24px; }
+:root {
+  --ink: #241C11;
+  --sand: #EFE3CC;
+  --cream: #FCF6E9;
+  --tomato: #F04E23;
+  --butter: #FFB937;
+  --leaf: #4E9B62;
+  --pool: #2A9D8F;
+  --ink-soft: #6B5B45;
+  --ink-mute: #6E5F49;
+  --disp: Fredoka, system-ui, sans-serif;
+  --body: Rubik, system-ui, sans-serif;
+  --mono: Azeret Mono, ui-monospace, monospace;
+}
+.page { max-width: 1100px; margin: 0 auto; }
+h1 { font-family: var(--disp); font-weight: 600; font-size: 30px; margin-bottom: 8px; letter-spacing: -0.5px; }
+.sub { font-family: var(--body); font-size: 15px; color: var(--ink-mute); margin-bottom: 40px; }
+.section { margin-bottom: 56px; }
+.section h2 { font-family: var(--disp); font-weight: 600; font-size: 20px; margin-bottom: 16px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+@media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+
+/* Wordmark + Arc: letters sit on baseline, arc wraps behind Y and P */
+.krypt-arc { font-family: var(--disp); font-weight: 700; color: var(--ink); position: relative; display: inline-flex; align-items: baseline; gap: 6px; }
+.krypt-arc .char { display: inline-block; position: relative; z-index: 2; }
+.krypt-arc .arc-svg { position: absolute; z-index: 1; pointer-events: none; }
+.krypt-arc .arc-ring { fill: none; stroke: currentColor; stroke-width: 10; stroke-linecap: round; transform-origin: center; }
+.krypt-arc .arc-seal { fill: currentColor; transform-origin: center; }
+
+/* Header lockup */
+.header-lockup { background: var(--ink); border-radius: 14px; padding: 20px 28px; display: flex; align-items: center; gap: 16px; inline-size: fit-content; margin-bottom: 32px; }
+.header-lockup .krypt-arc { color: var(--cream); font-size: 40px; gap: 10px; }
+.header-lockup .arc-ring { stroke: var(--cream); }
+.header-lockup .arc-seal { fill: var(--cream); }
+
+/* Card */
+.card { background: var(--cream); border: 2px solid var(--ink); border-radius: 14px; padding: 24px; }
+.card h3 { font-family: var(--disp); font-weight: 600; font-size: 16px; margin-bottom: 8px; }
+.card p { font-family: var(--mono); font-size: 11px; color: var(--ink-mute); margin: 0; line-height: 1.5; }
+
+/* Construction */
+.construct { background: var(--ink); border-radius: 14px; padding: 32px; position: relative; }
+.grid-canvas { width: 300px; height: 300px; margin: 0 auto 24px auto; position: relative; background: rgba(252,246,233,0.05); border-radius: 10px; }
+.grid-line { position: absolute; background: rgba(252,246,233,0.12); }
+.grid-v { width: 2px; height: 100%; left: 50%; transform: translateX(-50%); }
+.grid-h { width: 100%; height: 2px; top: 50%; transform: translateY(-50%); }
+.grid-q1 { width: 2px; height: 100%; left: 25%; }
+.grid-q3 { width: 2px; height: 100%; left: 75%; }
+.logo-preview { width: 200px; height: 200px; margin: 0 auto; display: flex; align-items: center; justify-content: center; }
+.logo-preview .krypt-arc { font-size: 120px; }
+
+/* Spec table */
+.spec-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 11px; }
+.spec-table td { border-bottom: 1px solid var(--ink-mute); padding: 8px 4px; color: var(--ink-mute); }
+.spec-table td:first-child { color: var(--ink-soft); width: 40%; }
+
+/* Sizes */
+.sizes-row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.size-block { width: 64px; height: 64px; background: var(--ink); border-radius: 10px; display: flex; align-items: center; justify-content: center; position: relative; }
+.size-block .krypt-arc { font-size: 28px; gap: 4px; color: var(--cream); }
+.size-block .arc-ring { stroke: var(--cream); stroke-width: 6; }
+.size-block .arc-seal { fill: var(--cream); }
+.size-label { font-family: var(--mono); font-size: 10px; color: var(--ink-mute); margin-top: 6px; text-align: center; }
+
+/* Motion */
+.motion-card { background: var(--ink); border-radius: 14px; padding: 32px; display: flex; align-items: center; justify-content: center; gap: 24px; }
+.motion-krypt { font-size: 52px; color: var(--cream); gap: 12px; }
+.motion-krypt .arc-seal { animation: sealDrift 3s ease-in-out infinite; }
+.motion-krypt .arc-ring { animation: ringPulse 3s ease-in-out infinite; }
+@keyframes sealDrift {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 1; }
+  50% { transform: translate(4px, -4px) scale(1.1); opacity: 0.85; }
+}
+@keyframes ringPulse {
+  0%, 100% { transform: scale(1); stroke-dashoffset: 0; }
+  50% { transform: scale(1.04); stroke-dashoffset: 2; }
+}
+.motion-label { font-family: var(--disp); font-weight: 600; font-size: 15px; color: var(--cream); white-space: nowrap; }
+
+/* Clear space */
+.clear-card { background: var(--cream); border: 2px solid var(--ink); border-radius: 14px; padding: 24px; position: relative; }
+.clear-card .krypt-arc { font-size: 48px; margin: 0 auto 20px auto; display: block; color: var(--ink); }
+.clear-zone { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 180px; height: 180px; border: 2px dashed var(--ink-mute); border-radius: 50%; pointer-events: none; }
+
+.color-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.color-chip { width: 64px; height: 64px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 9px; color: var(--ink-mute); text-align: center; padding: 6px; line-height: 1.2; }
+.color-chip.ink { background: var(--ink); color: var(--cream); }
+.color-chip.cream { background: var(--cream); color: var(--ink); border: 2px solid var(--ink); }
+.color-chip.tomato { background: var(--tomato); color: var(--cream); }
+.color-chip.pool { background: var(--pool); color: var(--cream); }
+.color-chip.butter { background: var(--butter); color: var(--ink); }
+.color-chip.leaf { background: var(--leaf); color: var(--ink); }
+
+.foot { margin-top: 48px; font-family: var(--body); font-size: 13px; color: var(--ink-mute); border-top: 2px dashed var(--ink-mute); padding-top: 20px; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <h1>Krypt · Wordmark + Arc</h1>
+  <p class="sub">The arc wraps behind the wordmark, sealing the Y and P. One object.</p>
+
+  <!-- Header lockup -->
+  <div class="header-lockup">
+    <div class="krypt-arc cream">
+      <span class="char">K</span><span class="char">r</span><span class="char">y</span>
+      <svg class="arc-svg" width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+        <path class="arc-ring" d="M 10 24 A 14 14 0 0 1 38 24"/>
+        <circle class="arc-seal" cx="14" cy="24" r="6"/>
+      </svg>
+      <span class="char">p</span><span class="char">t</span>
+    </div>
+  </div>
+
+  <!-- Section 1: Construction -->
+  <div class="section grid-2">
+    <div class="construct">
+      <div class="grid-canvas">
+        <div class="grid-line grid-v"></div>
+        <div class="grid-line grid-h"></div>
+        <div class="grid-line grid-q1"></div>
+        <div class="grid-line grid-q3"></div>
+      </div>
+      <div class="logo-preview">
+        <div class="krypt-arc ink">
+          <span class="char">K</span><span class="char">r</span><span class="char">y</span>
+          <svg class="arc-svg" width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <path class="arc-ring" d="M 24 60 A 36 36 0 0 1 96 60"/>
+            <circle class="arc-seal" cx="34" cy="60" r="14"/>
+          </svg>
+          <span class="char">p</span><span class="char">t</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Construction grid</h3>
+        <p>Base unit: 120×120.<br>Cap height: 90 units.<br>Arc radius: 36 units.<br>Arc stroke: 10 units.<br>Arc span: 9 o'clock to 3 o'clock.<br>Seal diameter: 28 units.<br>Seal center: 34 units from left, on baseline.<br>Letter tracking: -4 units (tight).</p>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h3>Spec table</h3>
+        <div class="spec-table">
+          <tr><td>Wordmark</td><td>Fredoka 700</td></tr>
+          <tr><td>Arc position</td><td>Behind Y and P</td></tr>
+          <tr><td>Arc radius</td><td>36 units at base size</td></tr>
+          <tr><td>Arc stroke</td><td>10 units at base size</td></tr>
+          <tr><td>Seal diameter</td><td>28 units at base size</td></tr>
+          <tr><td>Color (idle)</td><td>Ink #241C11</td></tr>
+          <tr><td>Color (header)</td><td>Cream #FCF6E9 on ink</td></tr>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Sizes -->
+  <div class="section">
+    <h2>Size variants</h2>
+    <div class="sizes-row">
+      <div>
+        <div class="size-block ink">
+          <div class="krypt-arc cream">
+            <span class="char">K</span><span class="char">r</span><span class="char">y</span>
+            <svg class="arc-svg" width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+              <path class="arc-ring" d="M 2 8 A 6 6 0 0 1 14 8" stroke-width="2"/>
+              <circle class="arc-seal" cx="4" cy="8" r="2"/>
+            </svg>
+            <span class="char">p</span><span class="char">t</span>
+          </div>
+        </div>
+        <div class="size-label">16px · favicon</div>
+      </div>
+      <div>
+        <div class="size-block ink">
+          <div class="krypt-arc cream">
+            <span class="char">K</span><span class="char">r</span><span class="char">y</span>
+            <svg class="arc-svg" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path class="arc-ring" d="M 4 12 A 8 8 0 0 1 20 12" stroke-width="4"/>
+              <circle class="arc-seal" cx="6" cy="12" r="3"/>
+            </svg>
+            <span class="char">p</span><span class="char">t</span>
+          </div>
+        </div>
+        <div class="size-label">24px · tab icon</div>
+      </div>
+      <div>
+        <div class="size-block ink">
+          <div class="krypt-arc cream">
+            <span class="char">K</span><span class="char">r</span><span class="char">y</span>
+            <svg class="arc-svg" width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+              <path class="arc-ring" d="M 6 20 A 14 14 0 0 1 34 20" stroke-width="6"/>
+              <circle class="arc-seal" cx="10" cy="20" r="5"/>
+            </svg>
+            <span class="char">p</span><span class="char">t</span>
+          </div>
+        </div>
+        <div class="size-label">32px · header</div>
+      </div>
+      <div>
+        <div class="size-block ink">
+          <div class="krypt-arc cream">
+            <span class="char">K</span><span class="char">r</span><span class="char">y</span>
+            <svg class="arc-svg" width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+              <path class="arc-ring" d="M 12 40 A 28 28 0 0 1 68 40" stroke-width="10"/>
+              <circle class="arc-seal" cx="20" cy="40" r="10"/>
+            </svg>
+            <span class="char">p</span><span class="char">t</span>
+          </div>
+        </div>
+        <div class="size-label">64px · large</div>
+      </div>
+    </div>
+    <div class="spec-box">
+      <div class="spec-row"><span>Smallest usable</span><span>16px</span></div>
+      <div class="spec-row"><span>Clear space</span><span>1× seal diameter</span></div>
+      <div class="spec-row"><span>Background (mark)</span><span>ink #241C11</span></div>
+      <div class="spec-row"><span>Mark color</span><span>cream #FCF6E9</span></div>
+    </div>
+  </div>
+
+  <!-- Section 3: Clear space -->
+  <div class="section grid-2">
+    <div class="clear-card">
+      <div class="clear-zone"></div>
+      <div class="krypt-arc ink">
+        <span class="char">K</span><span class="char">r</span><span class="char">y</span>
+        <svg class="arc-svg" width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <path class="arc-ring" d="M 10 24 A 14 14 0 0 1 38 24"/>
+          <circle class="arc-seal" cx="14" cy="24" r="6"/>
+        </svg>
+        <span class="char">p</span><span class="char">t</span>
+      </div>
+      <div class="card" style="margin-top: auto;">
+        <h3>Clear space</h3>
+        <p>Radius equals one seal diameter from the mark center. No other element enters this zone.</p>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Color states</h3>
+      <div class="color-row">
+        <div class="color-chip ink">Idle · ink</div>
+        <div class="color-chip tomato">Pending · tomato</div>
+        <div class="color-chip leaf">Approved · leaf</div>
+        <div class="color-chip butter">Idle alt · butter</div>
+        <div class="color-chip pool">Pool · pool</div>
+      </div>
+      <p class="card" style="padding: 16px; margin-top: 16px;">Tomato = purchase waiting. Leaf = approved. Butter = idle. Arc and seal shift together with vault state.</p>
+    </div>
+  </div>
+
+  <!-- Section 4: Motion -->
+  <div class="section">
+    <h2>Motion state</h2>
+    <div class="motion-card">
+      <div class="motion-krypt">
+        <span class="char">K</span><span class="char">r</span><span class="char">y</span>
+        <svg class="arc-svg" width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <path class="arc-ring" d="M 14 32 A 20 20 0 0 1 50 32" stroke-dasharray="125" stroke-dashoffset="0"/>
+          <circle class="arc-seal" cx="18" cy="32" r="8"/>
+        </svg>
+        <span class="char">p</span><span class="char">t</span>
+      </div>
+      <div class="motion-label">Arc pulses and seal drifts when a purchase waits for your approval</div>
+    </div>
+    <div class="card" style="margin-top: 24px;">
+      <h3>Behavior</h3>
+      <p>Idle: seal rests inside arc.<br>Pending: seal drifts up-left, arc pulses.<br>Approved: seal breaks out of arc.<br>CSS animation only. No video. No glassmorphism.</p>
+    </div>
+  </div>
+
+  <div class="foot">
+    Colors: ink #241C11 · sand #EFE3CC · cream #FCF6E9 · tomato #F04E23 · butter #FFB937 · leaf #4E9B62 · pool #2A9D8F<br>
+    Type: Fredoka 700. No em dashes. No crypto imagery. Arc = vault wall, not coin.
+  </div>
+</div>
+
+</body>
+</html>
