@@ -184,11 +184,13 @@ while) and about 20 minutes.
 
 The bundled agent is deterministic, not an LLM. That is deliberate: it stands
 in for any real agent, because Krypt's guarantees come from the contract, not
-from the agent's behavior. The app exposes three errands that exercise the
-spending rules: a small purchase that auto-approves, a larger one that queues
-for the owner, and one above the cap that is refused. The payee allowlist has
-its own demonstration: the `simulate_spend` view call on the hosted read-only
-page refuses any seller not on the list.
+from the agent's behavior. Under the walkthrough limits, the app exposes three
+errands that exercise the spending rules: a small purchase that auto-approves,
+a larger one that queues for the owner, and one above the cap that is refused.
+The verdicts are computed from your live rules, so changing the limits changes
+what each errand does. The payee allowlist has its own demonstration: the
+`simulate_spend` view call on the hosted read-only page refuses any seller not
+on the list.
 
 ## Limitations
 
