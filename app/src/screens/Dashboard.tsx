@@ -51,18 +51,20 @@ export default function Dashboard({ config, user, initial, onSignOut }: Props) {
       const seq = ++refreshSeq.current;
       try {
         const fresh = await api.vault();
-        if (seq !== refreshSeq.current) return;
+        if (seq !== refreshSeq.current) return null;
         setData(fresh);
         setError(null);
+        return fresh;
       } catch (reason) {
-        if (seq !== refreshSeq.current) return;
+        if (seq !== refreshSeq.current) return null;
         if (reason instanceof ApiError && reason.status === 401) {
           onSignOut();
-          return;
+          return null;
         }
         if (!quiet) {
           setError(reason instanceof Error ? reason.message : String(reason));
         }
+        return null;
       }
     },
     [onSignOut],
@@ -156,7 +158,22 @@ export default function Dashboard({ config, user, initial, onSignOut }: Props) {
           : `Refused receipt ${receiptId}${pending ? ` (${vendorName(pending.payee)}, ${usd(pending.amount, rate)})` : ""}`,
         result.hash,
       );
-      await refresh(true);
+      const fresh = await refresh(true);
+      // Replace any stale run-outcome (e.g. the amber "Queued" card) with the
+      // decision the chain just recorded, so the card and the receipt agree.
+      const receipt = fresh?.vault.receipts.find((entry) => entry.id === receiptId);
+      setOutcome({
+        title: receipt?.purpose || `Receipt ${receiptId}`,
+        tone: approve ? "green" : "amber",
+        headline: approve ? "You approved it" : "You refused it",
+        detail:
+          receipt?.reason ||
+          (approve
+            ? "The payment reached the seller."
+            : "You recorded your answer. No money moved."),
+        status: receipt?.status,
+        txHash: result.hash,
+      });
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
     } finally {

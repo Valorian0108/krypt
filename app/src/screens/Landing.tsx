@@ -143,7 +143,8 @@ export default function Landing({ notice, onLoggedIn }: Props) {
               <div>
                 <b>Let the agent shop.</b>
                 <span className="howcopy">
-                  Small purchases pay themselves. Everything else waits for you.
+                  Small purchases pay themselves, bigger ones wait for you, and
+                  anything past your limits is refused.
                 </span>
               </div>
             </div>

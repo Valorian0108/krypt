@@ -20,7 +20,6 @@ export const ERRANDS = [
     payee: "data.eqxdemi.testnet",
     amountNear: "0.02",
     purpose: "Weekly commodity dataset for the research brief",
-    blurb: "A routine purchase, small enough to go through on its own.",
   },
   {
     id: "report",
@@ -29,7 +28,6 @@ export const ERRANDS = [
     payee: "data.eqxdemi.testnet",
     amountNear: "0.20",
     purpose: "Full research report with sources",
-    blurb: "Bigger than your auto-approve limit, so it should come to you.",
   },
   {
     id: "premium",
@@ -38,7 +36,6 @@ export const ERRANDS = [
     payee: "data.eqxdemi.testnet",
     amountNear: "0.50",
     purpose: "Premium real-time feed subscription",
-    blurb: "Above the per-purchase cap, so the rules should refuse it.",
   },
   {
     id: "unlisted",
@@ -47,7 +44,6 @@ export const ERRANDS = [
     payee: "worker.eqxdemi.testnet",
     amountNear: "0.02",
     purpose: "Sample dataset from a vendor that is not on the list",
-    blurb: "Not on your approved list, so the rules should refuse it.",
   },
 ];
 
@@ -60,7 +56,6 @@ export function errandList() {
     amountNear: errand.amountNear,
     amountYocto: nearToYocto(errand.amountNear).toString(),
     purpose: errand.purpose,
-    blurb: errand.blurb,
   }));
 }
 

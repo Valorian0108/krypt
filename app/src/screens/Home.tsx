@@ -62,15 +62,49 @@ export default function Home({
   const purposeOf = (receiptId: number) =>
     vault.receipts.find((receipt) => receipt.id === receiptId)?.purpose || "";
 
-  function jobVerdict(errand: Errand): { label: string; tone: string } {
+  function jobVerdict(errand: Errand): { label: string; tone: string; note: string } {
     const amount = BigInt(errand.amountYocto);
-    if (!payees.includes(errand.payee)) return { label: "will be refused: seller", tone: "c-tomato" };
-    if (rulesClosed) return { label: "will be refused: no rules", tone: "c-tomato" };
-    if (amount > cap) return { label: "will be refused: over cap", tone: "c-tomato" };
-    if (amount > remaining) return { label: "will be refused: budget", tone: "c-tomato" };
-    if (amount > spendable) return { label: "will be refused: balance", tone: "c-tomato" };
-    if (amount > auto) return { label: "will ask you", tone: "c-butter" };
-    return { label: "will pay itself", tone: "c-leaf" };
+    if (!payees.includes(errand.payee))
+      return {
+        label: "will be refused: seller",
+        tone: "c-tomato",
+        note: "This seller is not on your approved list, so the rules refuse it.",
+      };
+    if (rulesClosed)
+      return {
+        label: "will be refused: no rules",
+        tone: "c-tomato",
+        note: "Your spending limits are at zero, so every purchase is refused.",
+      };
+    if (amount > cap)
+      return {
+        label: "will be refused: over cap",
+        tone: "c-tomato",
+        note: "Above your per-purchase cap, so the rules refuse it.",
+      };
+    if (amount > remaining)
+      return {
+        label: "will be refused: budget",
+        tone: "c-tomato",
+        note: "It would exceed your budget for this period, so the rules refuse it.",
+      };
+    if (amount > spendable)
+      return {
+        label: "will be refused: balance",
+        tone: "c-tomato",
+        note: "More than the vault holds, so it cannot pay.",
+      };
+    if (amount > auto)
+      return {
+        label: "will ask you",
+        tone: "c-butter",
+        note: "Bigger than your auto-approve limit, so it comes to you.",
+      };
+    return {
+      label: "will pay itself",
+      tone: "c-leaf",
+      note: "Inside your auto-approve limit, so it pays itself.",
+    };
   }
 
   const jobs = config.errands.filter((errand) => errand.id !== "unlisted");
@@ -223,7 +257,7 @@ export default function Home({
                 {usd(errand.amountYocto, rate)}
                 <span className="mono">{near(errand.amountYocto, 24)} NEAR</span>
               </div>
-              <p className="note">{errand.blurb}</p>
+              <p className="note">{verdict.note}</p>
               <div className="chips">
                 <span className={`chip ${verdict.tone}`}>{verdict.label}</span>
               </div>

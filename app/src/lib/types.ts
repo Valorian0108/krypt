@@ -12,7 +12,6 @@ export type Errand = {
   amountNear: string;
   amountYocto: string;
   purpose: string;
-  blurb: string;
 };
 
 export type AppConfig = {
