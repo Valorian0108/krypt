@@ -29,356 +29,447 @@
     <a class="skip" href="#main">Skip to content</a>
 
     <header class="top">
-      <a class="brand" href="./">
-        <img src="./krypt.svg" alt="" width="28" height="28" />
+      <a class="toplink" href="./">
         <span class="wordmark">KRYPT</span>
-        <span class="network">testnet</span>
       </a>
-      <nav class="nav" aria-label="Sections">
-        <a href="#vault">Live vault</a>
-        <a href="#rules">Try the rules</a>
-        <a href="#run">Run it locally</a>
+      <span class="testnet">testnet</span>
+
+      <nav class="tabs" aria-label="Sections">
+        <a class="tab" href="#vault">Live vault</a>
+        <a class="tab" href="#rules">Try the rules</a>
+        <a class="tab" href="#run">Run it locally</a>
       </nav>
+
+      <span class="spacer"></span>
+
       <a
-        class="repo"
+        class="signout"
         href="https://github.com/Valorian0108/krypt"
         target="_blank"
         rel="noreferrer"
-        >GitHub <span aria-hidden="true">↗</span></a
+        >GitHub</a
       >
     </header>
 
-    <main id="main" class="page">
+    <main class="page" id="main">
       <section class="hero">
-        <div class="hero-copy">
-          <p class="kicker">a spending account for your agent</p>
-          <h1>Your agent can shop.<br />It <span class="hl">cannot</span> drain you.</h1>
+        <div class="pop">
+          <span class="kicker">a spending account for your agent</span>
+          <h1 class="hero-title">
+            Your agent can shop. It <span class="hl">cannot</span> drain you.
+          </h1>
           <p class="lede">
-            Krypt keeps an AI agent's money in a NEAR smart contract that enforces your
-            rules. This page is a live, read-only view of one vault on testnet. Every
-            number below comes from the chain.
+            This page is a live, read-only view of one vault on the NEAR test
+            network. Every number below is read from the chain, and the rule
+            check is the contract's own answer.
           </p>
           <div class="cta">
-            <a class="btn b-butter" href="#rules">Try the rules</a>
-            <a class="link" href="#run">Run the full app</a>
+            <a class="b-butter b-big" href="#rules">Try the rules</a>
+            <a class="demo-link" href="#run">Run the full app</a>
           </div>
           <p class="fine">
             Test money only. No wallet. This page never asks you to sign or spend.
           </p>
         </div>
 
-        <aside class="vault-pass" aria-label="Live vault snapshot">
-          <div class="pass-top">
-            <span class="mono pass-id">vault2.vaults.eqxdemi.testnet</span>
-            <span class="live"><span class="dot" aria-hidden="true"></span> live</span>
+        <div class="visual pop" style="--d: .12s">
+          <div class="backcard">
+            <span class="kicker">your rules</span>
+            <div class="chips" id="heroChips"></div>
           </div>
-          <p class="pass-label">available to spend</p>
-          <p class="pass-amount" id="heroAvailable">$—</p>
-          <p class="pass-near" id="heroNear">reading the chain…</p>
-          <div class="chips" id="heroChips"></div>
-          <p class="pass-foot">
-            read from NEAR testnet <span id="heroStamp"></span>
-          </p>
-        </aside>
-      </section>
-
-      <section class="local-band" aria-labelledby="local-title">
-        <div>
-          <p class="kicker kicker-light">why there is no sign-in button here</p>
-          <h2 id="local-title">The login only trusts localhost.</h2>
-          <p>
-            The shared FastAuth testnet client accepts one redirect origin:
-            <code>http://localhost:3000</code>. A hosted page cannot complete that
-            login, so this one does not pretend to. The full owner flow runs from the
-            repo on your machine. This page gives you the live vault and the real policy
-            check.
-          </p>
-        </div>
-        <a class="btn b-butter" href="#run">How to run it</a>
-      </section>
-
-      <section id="vault" class="section">
-        <header class="section-head">
-          <div>
-            <p class="kicker">the vault, live</p>
-            <h2>One owner, one agent, limits on chain.</h2>
-            <p>Read-only. Refreshes every 30 seconds.</p>
-          </div>
-          <div class="readmeta">
-            <span id="stamp">connecting…</span>
-            <button id="refresh" class="btn small" type="button">Refresh</button>
-          </div>
-        </header>
-
-        <div id="loadError" class="error" role="alert" hidden></div>
-
-        <div class="grid-3">
-          <article class="card">
-            <p class="kicker">available to spend</p>
-            <p class="big" id="available">$—</p>
-            <p class="sub" id="availableNear">exactly — NEAR</p>
-            <p class="note">
-              The vault holds <b id="totalBalance">—</b> in total. Part of it is locked
-              by the network as storage for receipts. It is still the owner's money, just
-              not spendable.
-            </p>
-          </article>
-
-          <article class="card">
-            <p class="kicker" id="budgetLabel">budget left</p>
-            <p class="big small" id="budgetLeft">$—</p>
-            <div
-              class="meter"
-              id="budgetMeter"
-              role="img"
-              aria-label="Share of the budget spent"
-            >
-              <div class="fill" id="budgetFill"></div>
+          <div class="frontcard lift">
+            <div class="mini-head">
+              <span class="kicker">last receipts</span>
+              <span class="sticker">test money</span>
             </div>
-            <p class="sub" id="budgetSub">Spent — of —.</p>
-            <p class="note" id="resetNote"></p>
-          </article>
-
-          <article class="card">
-            <p class="kicker">the guardrails</p>
-            <ul class="rulelist" id="ruleList">
-              <li><span>cap per purchase</span><b>—</b></li>
-              <li><span>auto-approve up to</span><b>—</b></li>
-              <li><span>can pay</span><b>—</b></li>
-              <li><span>agent</span><b>—</b></li>
-            </ul>
-          </article>
-        </div>
-
-        <div class="grid-2">
-          <article class="card">
-            <header class="card-head">
-              <div>
-                <p class="kicker">receipts</p>
-                <h3>Every decision leaves a record.</h3>
+            <div id="miniReceipts">
+              <div class="mline">
+                <span class="mname">reading the chain</span>
+                <span class="mamt">…</span>
+                <span class="rchip">live</span>
               </div>
-              <span class="fine" id="receiptCount"></span>
-            </header>
-            <div class="receipts" id="receipts" aria-live="polite"></div>
-            <div class="receipt-foot">
-              <p class="fine">Newest first. Written by the contract, not by this page.</p>
-              <button id="receiptToggle" class="link button-link" type="button" hidden>
-                Show all
-              </button>
             </div>
-          </article>
-
-          <article class="card under">
-            <p class="kicker">under the hood</p>
-            <h3>The money is guarded by code.</h3>
-            <ul class="facts">
-              <li><span>network</span><b>NEAR testnet</b></li>
-              <li>
-                <span>vault</span>
-                <a
-                  id="vaultLink"
-                  class="mono"
-                  href="https://explorer.testnet.near.org/accounts/vault2.vaults.eqxdemi.testnet"
-                  target="_blank"
-                  rel="noreferrer"
-                  >vault2.vaults.eqxdemi.testnet</a
-                >
-              </li>
-              <li>
-                <span>contract code hash</span>
-                <span class="mono wrap" id="codeHash">—</span>
-              </li>
-              <li><span>storage used</span><b id="storage">—</b></li>
-              <li><span>pending approvals</span><b id="pending">—</b></li>
-            </ul>
-            <p class="note">
-              The agent holds a scoped key. It can request a spend and nothing else. It
-              cannot change rules, move the balance, or touch another account.
-            </p>
-            <a
-              class="link"
-              href="https://github.com/Valorian0108/krypt"
-              target="_blank"
-              rel="noreferrer"
-              >Read the contract and app</a
-            >
-          </article>
+            <div class="mini-foot" id="heroStamp">vault2.vaults.eqxdemi.testnet</div>
+          </div>
         </div>
       </section>
 
-      <section id="rules" class="section">
-        <header class="section-head">
+      <section class="trust">
+        <div class="card lift pop" style="--d: .18s">
+          <span class="kicker">a hard cap</span>
+          <h2 class="cardtitle">Above your limit, the account says no.</h2>
+          <p class="note">
+            It does not matter what the agent was told. The limit lives in the
+            account itself, not in the agent's instructions.
+          </p>
+        </div>
+        <div class="card lift pop" style="--d: .24s">
+          <span class="kicker">who gets paid</span>
+          <h2 class="cardtitle">Only people you trust get paid.</h2>
+          <p class="note">
+            Anyone else is refused before a single cent moves, even if the
+            request looks harmless.
+          </p>
+        </div>
+        <div class="card lift pop" style="--d: .30s">
+          <span class="kicker">receipts</span>
+          <h2 class="cardtitle">Every move leaves a receipt.</h2>
+          <p class="note">
+            Paid, waiting, refused. The record lives on the network, and this
+            page shows it exactly as written.
+          </p>
+        </div>
+      </section>
+
+      <div class="pagehead pop" id="vault">
+        <div>
+          <span class="kicker">the vault, live</span>
+          <h2>One owner, one agent, limits on chain.</h2>
+          <p class="lede-sm">
+            Read-only. The page refreshes itself every 30 seconds.
+          </p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px">
+          <span class="fine" style="margin: 0" id="stamp">connecting…</span>
+          <button class="b-ghost" id="refresh" type="button">Refresh</button>
+        </div>
+      </div>
+
+      <div class="callout callout-red" role="alert" id="loadError" hidden>
+        <strong id="loadTitle">The page could not reach the network</strong>
+        <p id="loadMsg"></p>
+      </div>
+
+      <div class="row">
+        <section class="card hero-card pop" style="--d: .02s">
+          <span class="kicker">
+            available to spend <span class="sticker">test money</span>
+          </span>
           <div>
-            <p class="kicker">try the rules</p>
-            <h2>Ask the live contract what it would do.</h2>
-            <p>
-              This calls <code>simulate_spend</code>. It writes nothing, queues nothing,
-              and moves no money. The answer is the real policy decision for the vault's
-              current rules.
-            </p>
+            <span class="big" id="available">$—</span>
           </div>
-        </header>
+          <div class="sub">
+            exactly <span class="mono" id="availableNear">—</span> NEAR on the test
+            network
+          </div>
+          <p class="note" id="totalNote">
+            The vault's total balance and its storage reserve appear here once
+            the chain answers.
+          </p>
+        </section>
 
-        <div class="sim">
-          <form id="simForm" class="card sim-form" novalidate>
-            <label class="field">
-              <span>Who gets paid?</span>
-              <select id="payee" name="payee"></select>
-            </label>
+        <section class="card hero-card pop" style="--d: .08s">
+          <span class="kicker" id="budgetLabel">budget left</span>
+          <div>
+            <span class="big small" id="budgetLeft">$—</span>
+          </div>
+          <div class="meter" id="budgetMeter" role="img" aria-label="Share of the budget spent">
+            <div class="fill" id="budgetFill"></div>
+          </div>
+          <div class="sub" id="budgetSub">Spent — of —.</div>
+          <div class="lowline" id="lowLine" hidden>
+            Running low. The owner can raise it in the local app, or wait for the reset.
+          </div>
+          <p class="note">
+            The budget is a limit, not a balance. Raising it never adds money.
+            It only lets the agent spend more of the vault money on the left.
+          </p>
+          <div class="acts">
+            <a class="b-ghost" href="#rules">Try the rules</a>
+          </div>
+        </section>
+      </div>
 
-            <label class="field" id="otherWrap" hidden>
-              <span>Account to test</span>
-              <input
-                id="otherPayee"
-                name="otherPayee"
-                value="stranger.testnet"
-                spellcheck="false"
-                autocomplete="off"
-              />
-            </label>
+      <section class="card pending pop" id="pendingCard" hidden>
+        <div class="pbody">
+          <div class="phead">
+            <span class="dot"></span>
+            <span class="ptitle" id="pendingTitle">0 purchases waiting</span>
+          </div>
+          <div id="pendingList"></div>
+        </div>
+      </section>
 
-            <label class="field">
-              <span>How much, in dollars?</span>
-              <span class="money-input">
-                <span aria-hidden="true">$</span>
+      <section class="card pop" style="--d: .2s">
+        <div class="section-head" style="margin-bottom: 2px">
+          <span class="kicker">receipts</span>
+          <span class="spacer"></span>
+          <span class="fine" style="margin: 0" id="receiptCount"></span>
+        </div>
+        <div class="filters" id="filters" role="group" aria-label="Filter receipts"></div>
+        <div id="receiptList"></div>
+        <div class="more" id="moreWrap" hidden>
+          <button class="b-ghost" id="moreBtn" type="button">Show older receipts</button>
+        </div>
+      </section>
+
+      <details class="pop" style="--d: .26s">
+        <summary>under the hood</summary>
+        <p>
+          The agent holds a scoped key that can only request spends. The rules
+          live on chain in vault
+          <a
+            class="txlink"
+            href="https://explorer.testnet.near.org/accounts/vault2.vaults.eqxdemi.testnet"
+            target="_blank"
+            rel="noreferrer"
+            >vault2.vaults.eqxdemi.testnet</a
+          >, and they refuse anything over the caps or to anyone the owner has
+          not approved. Every receipt above is a record on the test network.
+        </p>
+        <div class="summary" style="margin-top: 12px">
+          <div class="srow">
+            <span>contract code hash</span>
+            <b class="mono" id="codeHash" style="font-size: 11.5px">—</b>
+          </div>
+          <div class="srow">
+            <span>storage used</span>
+            <b id="storage">—</b>
+          </div>
+          <div class="srow">
+            <span>pending approvals</span>
+            <b id="pending">—</b>
+          </div>
+          <div class="srow">
+            <span>can pay</span>
+            <b id="sumPayees">—</b>
+          </div>
+          <div class="srow">
+            <span>agent</span>
+            <b id="sumAgent">—</b>
+          </div>
+        </div>
+        <p class="fine">
+          The agent key cannot change rules, move money, or touch another
+          account. This page holds no key at all: it only reads.
+        </p>
+      </details>
+
+      <div class="pagehead pop" id="rules">
+        <div>
+          <span class="kicker">try the rules</span>
+          <h2>Ask the live contract what it would do.</h2>
+          <p class="lede-sm">
+            This calls <span class="code">simulate_spend</span>. It writes
+            nothing, queues nothing, and moves no money. The answer is the real
+            policy decision for the vault's current rules.
+          </p>
+        </div>
+      </div>
+
+      <div class="rules-grid">
+        <div class="stack">
+          <section class="card rule-card pop" style="--d: .04s">
+            <div class="rule-head">
+              <span class="kicker">a purchase to check</span>
+              <span class="chip c-pool">writes nothing</span>
+            </div>
+            <form id="simForm" novalidate>
+              <div class="field" style="margin-top: 0">
+                <span class="field-label" id="payeeLabel">Who gets paid?</span>
+                <div
+                  class="filters"
+                  id="payeeChips"
+                  role="radiogroup"
+                  aria-labelledby="payeeLabel"
+                  style="margin: 8px 0 0"
+                ></div>
+              </div>
+
+              <label class="field" id="otherWrap" hidden>
+                <span class="field-label">Account to test</span>
+                <input
+                  id="otherPayee"
+                  name="otherPayee"
+                  value="stranger.testnet"
+                  spellcheck="false"
+                  autocomplete="off"
+                />
+              </label>
+
+              <label class="field">
+                <span class="field-label">How much, in dollars?</span>
                 <input
                   id="amount"
                   name="amount"
                   inputmode="decimal"
                   value="1.00"
                   autocomplete="off"
-                  aria-label="Amount in dollars"
                 />
-              </span>
-            </label>
+              </label>
+              <div class="chips" id="presets" aria-label="Example amounts"></div>
+              <div class="exact">
+                Dollar amounts use the demo rate of $5.00 per NEAR, fixed for
+                readability. It is not a market price.
+              </div>
 
-            <div class="presets" id="presets" aria-label="Example amounts"></div>
+              <label class="field">
+                <span class="field-label">What is it for?</span>
+                <input
+                  id="purpose"
+                  name="purpose"
+                  value="Weekly market data"
+                  maxlength="280"
+                  autocomplete="off"
+                />
+              </label>
 
-            <label class="field">
-              <span>What is it for?</span>
-              <input
-                id="purpose"
-                name="purpose"
-                value="Weekly market data"
-                maxlength="280"
-                autocomplete="off"
-              />
-            </label>
+              <div class="acts">
+                <button class="b-butter" type="submit" id="simBtn">Check the rules</button>
+              </div>
+              <p class="busy" id="simBusy" aria-live="polite" hidden>
+                <span class="spin" aria-hidden="true"></span>Asking the contract…
+              </p>
+              <p class="err" id="simError" role="alert" hidden></p>
+            </form>
+          </section>
+        </div>
 
-            <button class="btn b-butter" type="submit" id="simBtn">Check the rules</button>
-            <p class="err" id="simError" role="alert" hidden></p>
-            <p class="fine">
-              Dollar amounts use the demo rate of $5.00 per NEAR, fixed for readability.
-              It is not a market price.
-            </p>
-          </form>
-
-          <article class="card result" id="result" aria-live="polite">
-            <p class="kicker">the contract says</p>
-            <p class="verdict" id="verdict">Ready when you are.</p>
-            <p class="sub" id="verdictSub">
-              Pick an amount and run the check. Nothing is sent.
-            </p>
+        <aside class="stack sticky">
+          <section class="card pop" style="--d: .08s" id="result">
+            <span class="kicker">the contract says</span>
+            <div class="ruleval" id="verdict" style="margin-top: 10px">Ready when you are.</div>
+            <p class="sub" id="verdictSub">Pick an amount and run the check. Nothing is sent.</p>
             <p class="note" id="verdictNote"></p>
             <p class="fine" id="simNote" hidden></p>
-            <div class="result-meta" id="resultMeta" hidden>
-              <span class="mono" id="simPayee"></span>
-              <span class="mono" id="simAmount"></span>
+            <div class="summary" id="resultMeta" hidden style="margin-top: 14px">
+              <div class="srow">
+                <span>who gets paid</span>
+                <b class="mono" id="simPayee" style="font-size: 11.5px"></b>
+              </div>
+              <div class="srow">
+                <span>amount</span>
+                <b id="simAmount"></b>
+              </div>
             </div>
-          </article>
-        </div>
-      </section>
+          </section>
 
-      <section class="section">
-        <header class="section-head">
-          <div>
-            <p class="kicker">how it works</p>
-            <h2>The agent asks. The contract answers.</h2>
-          </div>
-        </header>
-        <div class="grid-3">
-          <article class="card lift">
+          <section class="card pop" style="--d: .14s">
+            <span class="kicker">what the rules will do</span>
+            <div class="pline">
+              <span class="dotc d-leaf"></span>
+              <span>Under <b id="plAuto">—</b>: pays itself.</span>
+            </div>
+            <div class="pline">
+              <span class="dotc d-butter"></span>
+              <span>
+                From <b id="plAuto2">—</b> to <b id="plCap">—</b>: waits for the owner.
+              </span>
+            </div>
+            <div class="pline">
+              <span class="dotc d-tomato"></span>
+              <span>Over <b id="plCap2">—</b>: refused.</span>
+            </div>
+            <div class="pline">
+              <span class="dotc d-tomato"></span>
+              <span>Anyone not on the owner's list: refused.</span>
+            </div>
+          </section>
+        </aside>
+      </div>
+
+      <section class="card how pop" id="how">
+        <span class="kicker">how it works</span>
+        <div class="howgrid">
+          <div class="howstep">
             <span class="stepnum s1">1</span>
-            <h3>Set limits in dollars.</h3>
-            <p class="note">
-              A cap per purchase, an auto-approve limit, a budget per period, and the
-              sellers you trust. The rules live in the vault, not in the agent's
-              instructions.
-            </p>
-          </article>
-          <article class="card lift">
+            <div>
+              <b>Set your limits once.</b>
+              <span class="howcopy">
+                A cap per purchase, a budget per period, and the sellers you
+                trust.
+              </span>
+            </div>
+          </div>
+          <div class="howstep">
             <span class="stepnum s2">2</span>
-            <h3>Let the agent ask.</h3>
-            <p class="note">
-              Small purchases pay themselves. Anything above the auto-approve limit waits
-              for the owner. Anything above the cap, or to an unlisted seller, is refused
-              before money moves.
-            </p>
-          </article>
-          <article class="card lift">
+            <div>
+              <b>Let the agent shop.</b>
+              <span class="howcopy">
+                Small purchases pay themselves. Everything else waits for you.
+              </span>
+            </div>
+          </div>
+          <div class="howstep">
             <span class="stepnum s3">3</span>
-            <h3>Approve only what needs you.</h3>
-            <p class="note">
-              One approval, one signature, and the receipt is written. Every outcome stays
-              on chain: paid, waiting, refused, or failed.
-            </p>
-          </article>
+            <div>
+              <b>Approve only what needs you.</b>
+              <span class="howcopy">
+                One press, one signature, and the receipt is written.
+              </span>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section id="run" class="section run">
-        <div class="run-copy">
-          <p class="kicker">run the full app</p>
-          <h2>The owner flow stays local.</h2>
-          <p class="lede-sm">
-            The hosted page can read and simulate. To sign in, set rules, approve a
-            purchase, or refuse one, run the app on your machine.
+      <div class="row" id="run">
+        <section class="card pop" style="--d: .04s">
+          <span class="kicker">run the full app</span>
+          <h2 style="margin-top: 6px">The owner flow stays local.</h2>
+          <p class="note">
+            The hosted page can read and simulate. To sign in, set rules,
+            approve a purchase, or refuse one, run the app on your machine.
+            The login only trusts <span class="code">http://localhost:3000</span>,
+            because that is the one origin the shared FastAuth testnet client
+            redirects back to.
           </p>
-          <ol class="steps">
+          <ul class="progress">
             <li>
-              <b>Clone the repo.</b>
-              <span>Everything is public, including the contract and the tests.</span>
+              <span class="pstate">1</span>
+              <div>
+                <b>Clone the repo.</b>
+                <span class="desc">Everything is public, including the contract and the tests.</span>
+              </div>
             </li>
             <li>
-              <b>Run the contract tests.</b>
-              <span>45 tests cover caps, budgets, allowlists, approvals, and failures.</span>
+              <span class="pstate">2</span>
+              <div>
+                <b>Run the contract tests.</b>
+                <span class="desc">45 tests cover caps, budgets, allowlists, approvals, and failures.</span>
+              </div>
             </li>
             <li>
-              <b>Start the app.</b>
-              <span
-                >Copy <code>app/env.example</code> to <code>app/.env</code> and fill in a
-                funded testnet sponsor. The README documents every variable.</span
-              >
+              <span class="pstate">3</span>
+              <div>
+                <b>Start the app.</b>
+                <span class="desc">
+                  Copy app/env.example to app/.env and fill in a funded testnet
+                  sponsor. The README documents every variable.
+                </span>
+              </div>
             </li>
             <li>
-              <b>Open exactly <code>http://localhost:3000</code>.</b>
-              <span>That origin is the only one the FastAuth testnet client allows.</span>
+              <span class="pstate">4</span>
+              <div>
+                <b>Open exactly http://localhost:3000.</b>
+                <span class="desc">That origin is the only one the FastAuth testnet client allows.</span>
+              </div>
             </li>
-          </ol>
-          <div class="cta">
+          </ul>
+          <div class="acts">
             <a
-              class="btn b-butter"
+              class="b-butter"
               href="https://github.com/Valorian0108/krypt#run-locally"
               target="_blank"
               rel="noreferrer"
               >README: run locally</a
             >
             <a
-              class="link"
+              class="demo-link"
               href="https://github.com/Valorian0108/krypt#try-it"
               target="_blank"
               rel="noreferrer"
               >What you can test</a
             >
           </div>
-        </div>
+        </section>
 
-        <div class="terminal-wrap">
-          <div class="terminal-head">
-            <span class="mono">terminal</span>
-            <button id="copyBtn" class="copy" type="button">Copy</button>
+        <div class="terminal-wrap pop" style="--d: .1s">
+          <div class="terminal-row">
+            <span>terminal</span>
+            <button class="copybtn" id="copyBtn" type="button">Copy</button>
           </div>
-          <pre class="terminal"><code id="commands">git clone https://github.com/Valorian0108/krypt.git
+          <pre class="outcome-logs" id="commands">git clone https://github.com/Valorian0108/krypt.git
 cd krypt/contract
 cargo test
 
@@ -386,22 +477,25 @@ cd ../app
 npm install
 npm run dev
 
-# open http://localhost:3000</code></pre>
-          <p class="fine terminal-fine">
+# open http://localhost:3000</pre>
+          <p class="terminal-fine">
             The full app needs a funded NEAR testnet sponsor and a local
             <code>app/.env</code>. The hosted page needs neither.
           </p>
         </div>
+      </div>
+
+      <section class="ctaband pop">
+        <div>
+          <h2>The agent asks. The contract answers.</h2>
+          <p>Test money, real checks, live on the test network right now.</p>
+        </div>
+        <a class="b-butter b-big" href="#vault">See the live vault</a>
       </section>
 
       <footer class="foot">
-        <span>Krypt on NEAR testnet. Test money only.</span>
-        <span>
-          <a href="https://github.com/Valorian0108/krypt" target="_blank" rel="noreferrer"
-            >GitHub</a
-          >
-          · MIT · 2026
-        </span>
+        <span>Runs on the NEAR test network. The money is test money.</span>
+        <span class="mono">read-only showcase · MIT · 2026</span>
       </footer>
     </main>
   </body>

@@ -1,5 +1,7 @@
 // Read-only showcase logic. Every number is fetched from NEAR testnet view
-// calls. This page never signs, broadcasts, or writes.
+// calls. This page never signs, broadcasts, or writes. The markup it fills
+// uses the same classes as the signed-in app, so the hosted page and the
+// local app read as one product.
 
 const RPCS = [
   "https://test.rpc.fastnear.com",
@@ -12,15 +14,17 @@ const YOCTO = 10n ** 24n;
 const RATE_BASIS = BigInt(Math.round(RATE * 100));
 const NS_PER_DAY = 86_400_000_000_000;
 const REFRESH_MS = 30_000;
+const PAGE_SIZE = 10;
 const OTHER = "__other";
 
+// Same words and tones as the app's ReceiptChip.
 const STATUS = {
-  Settled: { label: "paid on its own", tone: "c-leaf" },
-  Queued: { label: "waiting for you", tone: "c-butter" },
-  OwnerApproved: { label: "you approved", tone: "c-pool" },
-  OwnerRefused: { label: "you refused", tone: "" },
-  Rejected: { label: "refused by rules", tone: "c-tomato" },
-  TransferFailed: { label: "payment failed", tone: "c-tomato" },
+  Settled: { label: "paid on its own", tone: "c-leaf", mini: "paid" },
+  Queued: { label: "waiting for you", tone: "c-butter", mini: "waiting" },
+  OwnerApproved: { label: "you approved", tone: "c-pool", mini: "approved" },
+  OwnerRefused: { label: "you refused", tone: "", mini: "refused" },
+  Rejected: { label: "refused by rules", tone: "c-tomato", mini: "refused" },
+  TransferFailed: { label: "payment failed", tone: "c-tomato", mini: "failed" },
 };
 
 const $ = (id) => document.getElementById(id);
@@ -235,6 +239,26 @@ function relativeNs(ns) {
   return `${days}d ago`;
 }
 
+// Same day grouping as the app's receipts page.
+function dayLabel(timestampNs) {
+  const ms = toMs(timestampNs);
+  if (ms === null) return "Earlier";
+  const date = new Date(ms);
+  const today = new Date();
+  const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+  const startOfThatDay = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+  const dayMs = 86_400_000;
+  if (startOfThatDay === startOfToday) return "Today";
+  if (startOfThatDay === startOfToday - dayMs) return "Yesterday";
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function groupOf(status) {
+  if (status === "Settled" || status === "OwnerApproved") return "paid";
+  if (status === "Queued") return "waiting";
+  return "refused";
+}
+
 function shortId(id, size = 10) {
   if (!id) return "none";
   return id.length <= size + 4 ? id : `${id.slice(0, size)}…${id.slice(-4)}`;
@@ -250,39 +274,47 @@ function refusalLabel(reason) {
   return "refused by rules";
 }
 
+function chipLabel(receipt) {
+  if (receipt.status === "Rejected") return refusalLabel(receipt.reason);
+  return (STATUS[receipt.status] || { label: receipt.status }).label;
+}
+
+function chipTone(receipt) {
+  return (STATUS[receipt.status] || { tone: "" }).tone;
+}
+
 // ---------------------------------------------------------------------
 // Rendering
 // ---------------------------------------------------------------------
 
 let vaultData = null;
-let showAll = false;
 let rulesKey = "";
 let stampText = "";
+let filter = "all";
+let visible = PAGE_SIZE;
 
 function render() {
   const data = vaultData;
   if (!data) return;
   const { status, rules, receipts, pending, account } = data;
 
-  setText("heroStamp", stampText ? `· ${stampText}` : "");
   setText("stamp", `read at ${stampText}`);
+  setText("heroStamp", `live from ${VAULT_ID} · read at ${stampText}`);
 
   if (data.spendable !== null) {
-    setText("heroAvailable", usdText(data.spendable));
-    setText("heroNear", `${nearText(data.spendable, 4)} NEAR spendable`);
     setText("available", usdText(data.spendable));
-    setText("availableNear", `${nearText(data.spendable, 6)} NEAR spendable`);
+    setText("availableNear", nearText(data.spendable, 24));
+    setText(
+      "totalNote",
+      `The vault holds ${usdText(data.balance)} in total. Another ${usdText(
+        data.reserve,
+      )} of it is locked by the network as storage for the receipts. Still the owner's money, just not spendable.`,
+    );
   } else {
-    const message = "storage reserve unreadable";
-    setText("heroAvailable", "—");
-    setText("heroNear", message);
     setText("available", "—");
-    setText("availableNear", message);
+    setText("availableNear", "—");
+    setText("totalNote", "The storage reserve was unreadable, so the spendable share is unknown.");
   }
-  setText(
-    "totalBalance",
-    `${nearText(data.balance, 4)} NEAR (${usdText(data.balance)})`,
-  );
 
   const spent = BigInt(status.spent_this_period || "0");
   const budget = BigInt(rules.budget_per_period || "0");
@@ -293,54 +325,74 @@ function render() {
   setText("budgetSub", `Spent ${usdText(spent)} of ${usdText(budget)}.`);
   const fill = $("budgetFill");
   fill.style.width = `${Math.min(100, share)}%`;
-  fill.className = `fill ${share >= 80 ? "m-tomato" : share >= 50 ? "m-butter" : ""}`.trim();
-  $("budgetMeter").setAttribute(
-    "aria-label",
-    `${share.toFixed(1)}% of the budget spent`,
-  );
-  setText(
-    "resetNote",
-    status.next_period_reset_ns > 0 && rules.period_ns > 1
-      ? `The period resets ${timeOf(status.next_period_reset_ns)}.`
-      : "",
-  );
+  fill.className = `fill ${share >= 80 ? "m-tomato" : share >= 50 ? "m-butter" : "m-leaf"}`;
+  $("budgetMeter").setAttribute("aria-label", `${share.toFixed(1)}% of the budget spent`);
+  if (status.next_period_reset_ns > 0 && rules.period_ns > 1) {
+    setText("budgetSub", `Spent ${usdText(spent)} of ${usdText(budget)}. Resets ${timeOf(status.next_period_reset_ns)}.`);
+  }
+  $("lowLine").hidden = share < 80;
 
   const payees = rules.payees || [];
-  const items = [
-    ["cap per purchase", usdText(rules.cap_per_spend)],
-    ["auto-approve up to", usdText(rules.auto_limit)],
-    ["can pay", payees.length ? payees.join(", ") : "nobody yet"],
-    ["agent", status.agent ? shortId(status.agent) : "none"],
-  ];
-  $("ruleList").replaceChildren(
-    ...items.map(([label, value]) => {
-      const li = make("li");
-      li.append(make("span", null, label), make("b", null, value));
-      if (label === "agent" && status.agent) li.title = status.agent;
-      return li;
-    }),
-  );
-
   $("heroChips").replaceChildren(
-    make("span", "chip c-butter", `cap per purchase ${usdText(rules.cap_per_spend)}`),
-    make("span", "chip c-leaf", `auto-approve up to ${usdText(rules.auto_limit)}`),
+    make("span", "chip", `cap per purchase ${usdText(rules.cap_per_spend)}`),
+    make("span", "chip", `auto-approve ${usdText(rules.auto_limit)}`),
     make(
       "span",
-      `chip ${payees.length ? "c-pool" : "c-tomato"}`,
-      payees.length ? `can pay: ${payees.length}` : "can pay: nobody yet",
+      "chip",
+      payees.length ? `${payees.length} trusted seller${payees.length === 1 ? "" : "s"}` : "no sellers yet",
     ),
   );
 
-  const shown = showAll ? receipts : receipts.slice(0, 8);
-  $("receipts").replaceChildren(
-    ...(shown.length
-      ? shown.map(receiptRow)
-      : [make("p", "receipt-empty", "No receipts yet.")]),
+  $("miniReceipts").replaceChildren(
+    ...(receipts.slice(0, 3).length
+      ? receipts.slice(0, 3).map((receipt) => {
+          const row = make("div", "mline");
+          row.append(
+            make("span", "mname", receipt.purpose),
+            make("span", "mamt", usdText(receipt.amount)),
+            make(
+              "span",
+              `rchip ${chipTone(receipt)}`.trim(),
+              receipt.status === "Rejected"
+                ? "refused"
+                : (STATUS[receipt.status] || { mini: receipt.status }).mini,
+            ),
+          );
+          row.title = `${receipt.payee}: ${chipLabel(receipt)}`;
+          return row;
+        })
+      : [make("div", "mline", "")]),
   );
-  setText("receiptCount", receipts.length ? `${receipts.length} total` : "");
-  const toggle = $("receiptToggle");
-  toggle.hidden = receipts.length <= 8;
-  toggle.textContent = showAll ? "Show latest 8" : `Show all ${receipts.length}`;
+
+  // Pending approvals: visible, but only the owner can decide, locally.
+  const pendingCard = $("pendingCard");
+  pendingCard.hidden = pending.length === 0;
+  if (pending.length) {
+    setText(
+      "pendingTitle",
+      `${pending.length} purchase${pending.length === 1 ? "" : "s"} waiting for the owner`,
+    );
+    $("pendingList").replaceChildren(
+      ...pending.map((item) => {
+        const wrap = make("div", "pitem");
+        const left = make("div");
+        const line = make("div", "jobline");
+        line.append(
+          document.createTextNode(`${item.payee} wants `),
+          make("span", "amt", usdText(item.amount)),
+          make("span", "mono", ` (${nearText(item.amount, 24)} NEAR)`),
+        );
+        const note = make("p", "note");
+        note.textContent =
+          "Money only moves if the owner approves it from the local app. This page can only watch.";
+        left.append(line, note);
+        wrap.append(left);
+        return wrap;
+      }),
+    );
+  }
+
+  renderReceipts(receipts);
 
   setText("codeHash", account.code_hash || "—");
   setText(
@@ -350,31 +402,113 @@ function render() {
       : "—",
   );
   setText("pending", String(pending.length));
+  setText("sumPayees", payees.length ? payees.join(", ") : "nobody yet");
+  setText("sumAgent", status.agent ? shortId(status.agent) : "none");
+
+  setText("plAuto", usdText(rules.auto_limit));
+  setText("plAuto2", usdText(rules.auto_limit));
+  setText("plCap", usdText(rules.cap_per_spend));
+  setText("plCap2", usdText(rules.cap_per_spend));
+}
+
+function renderReceipts(receipts) {
+  const counts = { all: receipts.length, paid: 0, waiting: 0, refused: 0 };
+  for (const receipt of receipts) counts[groupOf(receipt.status)] += 1;
+
+  const filtersEl = $("filters");
+  const wanted = [
+    ["all", "All"],
+    ["paid", "Paid"],
+    ["waiting", "Waiting"],
+    ["refused", "Refused"],
+  ];
+  filtersEl.replaceChildren(
+    ...wanted.map(([value, label]) => {
+      const button = make("button", `fchip ${filter === value ? "on" : ""}`);
+      button.type = "button";
+      button.setAttribute("aria-pressed", String(filter === value));
+      button.append(document.createTextNode(`${label} `), make("b", null, String(counts[value])));
+      button.addEventListener("click", () => {
+        filter = value;
+        visible = PAGE_SIZE;
+        renderReceipts(vaultData ? vaultData.receipts : []);
+      });
+      return button;
+    }),
+  );
+
+  setText(
+    "receiptCount",
+    receipts.length ? `${counts.all} on record · ${counts.refused} refused by the rules` : "",
+  );
+
+  const list = $("receiptList");
+  if (receipts.length === 0) {
+    list.replaceChildren(
+      make("p", "note", "No receipts yet. Every decision the contract makes appears here."),
+    );
+    $("moreWrap").hidden = true;
+    return;
+  }
+
+  const filtered = receipts.filter(
+    (receipt) => filter === "all" || groupOf(receipt.status) === filter,
+  );
+  if (filtered.length === 0) {
+    list.replaceChildren(
+      make(
+        "p",
+        "note",
+        filter === "waiting"
+          ? "Nothing is waiting. The agent has no open asks."
+          : `No ${filter} receipts in this account.`,
+      ),
+    );
+    $("moreWrap").hidden = true;
+    return;
+  }
+
+  const shown = filtered.slice(0, visible);
+  const groups = new Map();
+  for (const receipt of shown) {
+    const label = dayLabel(receipt.timestamp_ns);
+    if (!groups.has(label)) groups.set(label, []);
+    groups.get(label).push(receipt);
+  }
+
+  const nodes = [];
+  for (const [label, list_] of groups) {
+    nodes.push(make("h3", "ghead", label));
+    for (const receipt of list_) nodes.push(receiptRow(receipt));
+  }
+  list.replaceChildren(...nodes);
+
+  $("moreWrap").hidden = filtered.length <= visible;
 }
 
 function receiptRow(receipt) {
-  const row = make("div", "receipt");
+  const row = make("article", "bigrow");
   row.append(make("span", "rid", `#${receipt.id}`));
 
   const main = make("div", "rmain");
-  main.append(
-    make("b", null, receipt.payee),
-    make("span", null, receipt.purpose),
-  );
+  main.append(make("b", null, receipt.purpose), make("span", null, receipt.payee));
   main.title = `${receipt.payee}: ${receipt.purpose}`;
   row.append(main);
 
-  const meta = STATUS[receipt.status] || { label: receipt.status, tone: "" };
-  const label =
-    receipt.status === "Rejected" ? refusalLabel(receipt.reason) : meta.label;
-  const chip = make("span", `rchip ${meta.tone}`.trim(), label);
+  const num = make("div", "rnum");
+  num.append(
+    make("b", null, usdText(receipt.amount)),
+    make("span", "mono", `${nearText(receipt.amount, 6)} NEAR`),
+  );
+  row.append(num);
+
+  const chip = make("span", `rchip ${chipTone(receipt)}`.trim(), chipLabel(receipt));
   chip.title = receipt.reason || "";
   row.append(chip);
 
-  row.append(make("span", "amt", usdText(receipt.amount)));
-  const when = make("span", "when", relativeNs(receipt.timestamp_ns));
-  when.title = timeOf(receipt.timestamp_ns);
-  row.append(when);
+  const meta = make("div", "rmeta", relativeNs(receipt.timestamp_ns));
+  meta.title = timeOf(receipt.timestamp_ns);
+  row.append(meta);
   return row;
 }
 
@@ -382,7 +516,8 @@ function receiptRow(receipt) {
 // Simulator controls
 // ---------------------------------------------------------------------
 
-const payeeEl = $("payee");
+const payeeChips = $("payeeChips");
+let currentPayee = "";
 const otherWrap = $("otherWrap");
 const otherPayee = $("otherPayee");
 const amountEl = $("amount");
@@ -390,6 +525,7 @@ const purposeEl = $("purpose");
 const presetsEl = $("presets");
 const simForm = $("simForm");
 const simBtn = $("simBtn");
+const simBusy = $("simBusy");
 const simError = $("simError");
 const resultEl = $("result");
 const verdictEl = $("verdict");
@@ -399,21 +535,36 @@ const simNote = $("simNote");
 const resultMeta = $("resultMeta");
 
 function toggleOther() {
-  otherWrap.hidden = payeeEl.value !== OTHER;
+  otherWrap.hidden = currentPayee !== OTHER;
 }
 
+// The app has no native dropdowns in its own flows: choices are pill groups.
+// The payee picker follows that, as a radio group of fchips.
 function syncPayees(rules) {
-  const previous = payeeEl.value;
-  const approved = (rules.payees || []).map((id) => {
-    const option = make("option", null, `${id} (approved)`);
-    option.value = id;
-    return option;
-  });
-  const other = make("option", null, "A seller not on the list");
-  other.value = OTHER;
-  payeeEl.replaceChildren(...approved, other);
-  const exists = [...payeeEl.options].some((option) => option.value === previous);
-  payeeEl.value = exists ? previous : approved[0]?.value || OTHER;
+  const approved = rules.payees || [];
+  if (!currentPayee || (!approved.includes(currentPayee) && currentPayee !== OTHER)) {
+    currentPayee = approved[0] || OTHER;
+  }
+  const choices = [...approved, OTHER];
+  payeeChips.replaceChildren(
+    ...choices.map((value) => {
+      const selected = value === currentPayee;
+      const button = make(
+        "button",
+        `fchip ${selected ? "on" : ""}`,
+        value === OTHER ? "A seller not on the list" : value,
+      );
+      button.type = "button";
+      button.setAttribute("role", "radio");
+      button.setAttribute("aria-checked", String(selected));
+      button.addEventListener("click", () => {
+        currentPayee = value;
+        toggleOther();
+        syncPayees(rules);
+      });
+      return button;
+    }),
+  );
   toggleOther();
 }
 
@@ -426,7 +577,7 @@ function syncPresets(rules) {
 
   presetsEl.replaceChildren(
     ...presets.map(([label, cents]) => {
-      const button = make("button", "preset", `${label}: $${centsToInput(cents)}`);
+      const button = make("button", "chip", `${label}: $${centsToInput(cents)}`);
       button.type = "button";
       button.addEventListener("click", () => {
         amountEl.value = centsToInput(cents);
@@ -454,24 +605,24 @@ function renderSimulation(sim, payee, yocto) {
   const status = sim.would_be_status;
   const map = {
     Settled: {
-      tone: "tone-leaf",
+      tone: "outcome-green",
       verdict: "It would pay itself.",
-      sub: "Inside every rule. The vault would send the money without asking you.",
+      sub: "Inside every rule. The vault would send the money without asking the owner.",
     },
     Queued: {
-      tone: "tone-butter",
-      verdict: "It would wait for you.",
+      tone: "outcome-amber",
+      verdict: "It would wait for the owner.",
       sub: "Above the auto-approve limit, below the cap. The owner decides.",
     },
     Rejected: {
-      tone: "tone-tomato",
+      tone: "outcome-red",
       verdict: "It would refuse.",
       sub: "No money would move.",
     },
   };
-  const meta = map[status] || { tone: "tone-neutral", verdict: status, sub: "" };
+  const meta = map[status] || { tone: "", verdict: status, sub: "" };
 
-  resultEl.className = `card result ${meta.tone}`;
+  resultEl.className = `card pop ${meta.tone}`.trim();
   verdictEl.textContent = meta.verdict;
   verdictSub.textContent = meta.sub;
   verdictNote.textContent = sim.would_be_reason || "";
@@ -482,14 +633,11 @@ function renderSimulation(sim, payee, yocto) {
   resultMeta.hidden = false;
 }
 
-payeeEl.addEventListener("change", toggleOther);
-
 simForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   simError.hidden = true;
 
-  const payee =
-    payeeEl.value === OTHER ? otherPayee.value.trim() : payeeEl.value;
+  const payee = currentPayee === OTHER ? otherPayee.value.trim() : currentPayee;
   const cents = parseUsdToCents(amountEl.value);
   const purpose = purposeEl.value.trim();
 
@@ -508,8 +656,8 @@ simForm.addEventListener("submit", async (event) => {
   }
 
   simBtn.disabled = true;
-  simBtn.textContent = "Asking the contract…";
-  resultEl.className = "card result tone-neutral";
+  simBusy.hidden = false;
+  resultEl.className = "card pop";
   verdictEl.textContent = "Checking…";
   verdictSub.textContent = "This is a view call. Nothing is sent.";
   verdictNote.textContent = "";
@@ -525,7 +673,7 @@ simForm.addEventListener("submit", async (event) => {
     });
     renderSimulation(simulation, payee, yocto);
   } catch (error) {
-    resultEl.className = "card result tone-neutral";
+    resultEl.className = "card pop outcome outcome-red";
     verdictEl.textContent = "The check did not run.";
     verdictSub.textContent = describe(error);
     verdictNote.textContent =
@@ -534,13 +682,13 @@ simForm.addEventListener("submit", async (event) => {
     resultMeta.hidden = true;
   } finally {
     simBtn.disabled = false;
-    simBtn.textContent = "Check the rules";
+    simBusy.hidden = true;
   }
 });
 
-$("receiptToggle").addEventListener("click", () => {
-  showAll = !showAll;
-  render();
+$("moreBtn").addEventListener("click", () => {
+  visible += PAGE_SIZE;
+  renderReceipts(vaultData ? vaultData.receipts : []);
 });
 
 $("refresh").addEventListener("click", () => void refresh(true));
@@ -574,16 +722,21 @@ async function refresh(manual = false) {
       second: "2-digit",
     });
     $("loadError").hidden = true;
-    $("loadError").textContent = "";
     render();
     maybeSyncRules(vaultData.rules);
   } catch (error) {
     const message = describe(error);
-    const node = $("loadError");
-    node.hidden = false;
-    node.textContent = vaultData
-      ? `The page could not refresh. ${message} The numbers below are from the last successful read.`
-      : `The page could not reach NEAR testnet. ${message}`;
+    $("loadError").hidden = false;
+    setText(
+      "loadTitle",
+      vaultData ? "Showing the last good read" : "The page could not reach the network",
+    );
+    setText(
+      "loadMsg",
+      vaultData
+        ? `${message} The numbers below are from the last successful read.`
+        : message,
+    );
     if (vaultData) setText("stamp", `last read ${stampText} · refresh failed`);
   } finally {
     if (manual) button.disabled = false;

@@ -13,7 +13,7 @@
       ]
     },
     {
-      "source": "/(index\\.html)?",
+      "source": "/(.*)",
       "headers": [
         {
           "key": "Content-Security-Policy",
