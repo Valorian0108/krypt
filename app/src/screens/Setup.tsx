@@ -57,10 +57,12 @@ export default function Setup({ config, me, onDone, onSignOut }: Props) {
   const checkOnboarded = useCallback(
     async (current: User) => {
       setPhase("checking");
+      setError(null);
       try {
         const { vault } = await api.vault();
-        const onboarded =
-          vault.status.agent === current.agentId && BigInt(vault.rules.cap_per_spend) > 0n;
+        // Zero limits are a valid paused state, not a missing account. The
+        // registered agent is what marks this vault as onboarded.
+        const onboarded = vault.status.agent === current.agentId;
         if (onboarded) {
           onDone();
         } else {
@@ -68,9 +70,11 @@ export default function Setup({ config, me, onDone, onSignOut }: Props) {
           setPhase("approve");
         }
       } catch (reason) {
+        // A read failure is not proof that setup is missing. Stay on the
+        // checking screen with a retry instead of offering to rebuild.
         setError(reason instanceof Error ? reason.message : String(reason));
         setUser(current);
-        setPhase("approve");
+        setPhase("checking");
       }
     },
     [onDone],
@@ -204,9 +208,16 @@ export default function Setup({ config, me, onDone, onSignOut }: Props) {
         <main className="page-narrow">
           <section className="card setup-card" style={{ marginTop: 26 }}>
             <span className="kicker">almost there</span>
-            <h2>Checking your account</h2>
-            <BusyLine text="Reading your account from the test network" />
+            <h2>{error ? "Could not read your account" : "Checking your account"}</h2>
+            {!error && <BusyLine text="Reading your account from the test network" />}
             <ErrorNote message={error} />
+            {error && user && (
+              <p>
+                <button className="b-butter" onClick={() => void checkOnboarded(user)}>
+                  Try again
+                </button>
+              </p>
+            )}
           </section>
         </main>
       </>
