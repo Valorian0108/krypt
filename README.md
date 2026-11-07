@@ -93,6 +93,7 @@ not an access key on any vault, so it cannot move a user's money.
 | `counterparty/` | The other side of the demo economy: job-board vendor, hiring cycle, data seller. |
 | `worker-contract/` | Job-board counterparty contract: publishes quotes, fulfils jobs with a verifiable digest. |
 | `design/` | Static design mocks and the Soft design system (`soft.css`, logo spec). |
+| `showcase/` | Static read-only page for a hosted demo URL: live vault reads and `simulate_spend`, no sign-in. |
 
 ## Run locally
 
@@ -191,7 +192,9 @@ is refused.
   service.
 - Sign-in works only from `http://localhost:3000`: the FastAuth testnet
   client's redirect allowlist contains that one origin. A hosted deployment
-  of this app therefore cannot offer sign-in.
+  therefore cannot offer sign-in. The read-only page in `showcase/` is built
+  for that case: it reads the live vault and runs `simulate_spend`, but it
+  never signs, broadcasts, or writes.
 - Upgrading an already-deployed vault needs an owner-signed `DeployContract`;
   the repository includes an operator page for it at
   `app/deploy-upgrade.html`. Vaults provisioned from now on receive the
