@@ -5,6 +5,10 @@ contract vault on NEAR (testnet) that enforces the owner's rules on-chain, and
 a web app lets a non-crypto owner set those rules in dollars. Sign-in is an
 email code or a passkey through NEAR FastAuth: no wallet, no seed phrase.
 
+A read-only live demo, showing one real testnet vault and the contract's own
+rule check, is hosted at https://krypt-three-navy.vercel.app/. The full owner
+flow runs locally, as described in Run locally below.
+
 ## The idea
 
 Handing an AI agent a wallet means trusting the agent. Krypt removes the need
@@ -192,9 +196,10 @@ is refused.
   service.
 - Sign-in works only from `http://localhost:3000`: the FastAuth testnet
   client's redirect allowlist contains that one origin. A hosted deployment
-  therefore cannot offer sign-in. The read-only page in `showcase/` is built
-  for that case: it reads the live vault and runs `simulate_spend`, but it
-  never signs, broadcasts, or writes.
+  therefore cannot offer sign-in. The read-only page in `showcase/`, deployed
+  at https://krypt-three-navy.vercel.app/, is built for that case: it reads
+  the live vault and runs `simulate_spend`, but it never signs, broadcasts,
+  or writes.
 - Upgrading an already-deployed vault needs an owner-signed `DeployContract`;
   the repository includes an operator page for it at
   `app/deploy-upgrade.html`. Vaults provisioned from now on receive the
