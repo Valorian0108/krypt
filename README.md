@@ -173,8 +173,10 @@ while) and about 20 minutes.
    the payment execute and the receipt update.
 9. Run "Upgrade to the live premium feed" ($2.50). You see it refused: above
    the per-purchase cap. No money moves.
-10. Run "Pay a vendor you never approved". You see it refused: the payee is
-    not on the allowlist.
+10. To see the payee allowlist rule answer, open the hosted read-only page at
+    https://krypt-three-navy.vercel.app/ and use its simulator: pick "A seller
+    not on the list", enter any amount, and it refuses. The check is a view
+    call, so nothing is recorded or paid.
 11. Open Receipts. You see every decision above, with status, reason, and
     explorer links, matching what the contract wrote on-chain.
 
@@ -182,10 +184,11 @@ while) and about 20 minutes.
 
 The bundled agent is deterministic, not an LLM. That is deliberate: it stands
 in for any real agent, because Krypt's guarantees come from the contract, not
-from the agent's behavior. The app exposes four errands that exercise each
-rule: a small purchase that auto-approves, a larger one that queues for the
-owner, one above the cap that is refused, and one to an unapproved payee that
-is refused.
+from the agent's behavior. The app exposes three errands that exercise the
+spending rules: a small purchase that auto-approves, a larger one that queues
+for the owner, and one above the cap that is refused. The payee allowlist has
+its own demonstration: the `simulate_spend` view call on the hosted read-only
+page refuses any seller not on the list.
 
 ## Limitations
 
