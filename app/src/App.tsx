@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { ApiError, api, setTokenGetter } from "./lib/api";
 import { getIdToken, initAuth, isLoggedIn, logout } from "./lib/auth";
-import type { AppConfig, MeResponse, User, Vault, VaultResponse } from "./lib/types";
+import type { AppConfig, MeResponse, User, VaultResponse } from "./lib/types";
 import Landing from "./screens/Landing";
 import Setup from "./screens/Setup";
 import Dashboard from "./screens/Dashboard";
 import TopBar from "./components/TopBar";
 import { Button, ErrorNote } from "./components/ui";
+import { isOnboarded } from "./lib/vault";
 
 type View =
   | { name: "boot" }
@@ -14,10 +15,6 @@ type View =
   | { name: "landing"; notice?: string }
   | { name: "setup"; me: MeResponse }
   | { name: "dashboard"; user: User; vault: VaultResponse };
-
-function isOnboarded(vault: Vault, user: User): boolean {
-  return vault.status.agent === user.agentId && BigInt(vault.rules.cap_per_spend) > 0n;
-}
 
 export default function App() {
   const [config, setConfig] = useState<AppConfig | null>(null);

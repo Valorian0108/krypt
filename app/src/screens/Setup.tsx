@@ -11,6 +11,7 @@ import {
   usd,
 } from "../lib/money";
 import type { AppConfig, BroadcastResult, MeResponse, User, Vault } from "../lib/types";
+import { isOnboarded } from "../lib/vault";
 import TopBar from "../components/TopBar";
 import { BusyLine, Callout, Code, ErrorNote, TxLink } from "../components/ui";
 
@@ -61,8 +62,8 @@ export default function Setup({ config, me, onDone, onSignOut }: Props) {
       try {
         const { vault } = await api.vault();
         // Zero limits are a valid paused state, not a missing account. The
-        // registered agent is what marks this vault as onboarded.
-        const onboarded = vault.status.agent === current.agentId;
+        // shared rule keeps this in step with the router in App.tsx.
+        const onboarded = isOnboarded(vault, current);
         if (onboarded) {
           onDone();
         } else {
