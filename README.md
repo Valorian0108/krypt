@@ -9,12 +9,34 @@ A read-only live demo, showing one real testnet vault and the contract's own
 rule check, is hosted at https://krypt-three-navy.vercel.app/. The full owner
 flow runs locally, as described in Run locally below.
 
+## Judge quickstart
+
+- What it is: an on-chain spending account for an AI agent. The owner sets
+  limits in dollars; the vault contract enforces them.
+- Tracks: `security` (main) and `agents`.
+- Live vault on testnet: `vault2.vaults.eqxdemi.testnet`.
+- Read-only page, no sign-in: https://krypt-three-navy.vercel.app/
+- One-minute check: `cd contract && cargo test` (45 tests).
+- Full owner flow: Run locally, then Try it, Level 2 (about 20 minutes).
+- Demo video, 2 minutes 30 seconds, covering approve and refuse:
+  https://x.com/IfeTeddy0108/status/2119493630067151031
+
+The hosted page is read-only. It reads the vault and runs the contract's view
+check. Approvals, payments, and refusals are in the local app and in the
+video.
+
 ## The idea
 
 Handing an AI agent a wallet means trusting the agent. Krypt removes the need
 for trust: the vault contract, not the agent, decides what can be paid. Caps,
 allowlists, budgets, and approval queues live on-chain, where a compromised or
 confused agent cannot argue with them.
+
+One concrete case. An agent reads an email that says an invoice is overdue and
+must be paid now, and it believes the sender. With a wallet, that mistake is
+final. With Krypt, the request still has to pass the contract: the seller must
+be on the list, the amount under the cap, and the budget not yet spent. If any
+check fails, no money moves.
 
 ## Layers
 
@@ -57,6 +79,22 @@ not an access key on any vault, so it cannot move a user's money.
 5. Every outcome is written as a receipt in contract state, visible in the app
    and on the NEAR explorer.
 
+## See it on chain
+
+These are real testnet transactions from the live vault. Each opens in the
+NEAR testnet explorer.
+
+| What happened | Receipt | Transaction |
+| --- | --- | --- |
+| $0.10 auto-approved and paid | 0 | [request_spend](https://explorer.testnet.near.org/transactions/CsFBaR3UJavmZDQWdWUy19ufeynv2g85u39yvBKLP8oR) |
+| $1.00 queued for the owner | 1 | [request_spend](https://explorer.testnet.near.org/transactions/3wsy7msJhVdRW5f6tRTgvD3zPPzpDABPSmx3SkuKcHyn) |
+| the owner approved that request | 1 | [approve_spend](https://explorer.testnet.near.org/transactions/8EUtsqMvFNxqXUaiSLLDmMT2DdZ9cdyVhinjZSrXbYyf) |
+| $2.50 refused, above the cap | 6 | [request_spend](https://explorer.testnet.near.org/transactions/C9xyvZj9D5qx3SBdN6ywjUBxWwEdqbq9dEdYMk5rVY22) |
+| a seller not on the list refused | 4 | [request_spend](https://explorer.testnet.near.org/transactions/BRvZbKBUVpS9a9dV9Y4U2kgV2KjRXhMH6cn6gGEYDTNN) |
+
+The reason for each is in the transaction log, and the same receipts are
+readable with `get_receipts` on the vault account.
+
 ## Rules the owner sets
 
 - Cap per purchase
@@ -64,6 +102,17 @@ not an access key on any vault, so it cannot move a user's money.
 - Budget per period (day, week, or month)
 - Payee allowlist
 - The contract also supports rule expiry (`expires_at_ns`)
+
+## How this differs from a plain agent wallet
+
+- The owner sets rules in dollars, not in token amounts, and never has to know
+  what a yoctoNEAR is.
+- Sign-in is an email code or a passkey through FastAuth: no seed phrase, no
+  browser extension, nothing to install.
+- An approval re-checks the rules at approval time, so a request queued under
+  old rules cannot pass after the owner tightens them.
+- A storage reserve guard refuses spends that would leave the vault unable to
+  store its own receipts, so a runaway agent cannot fill the vault with spam.
 
 ## Security model
 
@@ -101,9 +150,11 @@ not an access key on any vault, so it cannot move a user's money.
 
 ## Run locally
 
-Prerequisites: Node.js (recent LTS) and npm. Rust with the
-`wasm32-unknown-unknown` target only if you want to rebuild the contract; a
-compiled build is bundled at `app/assets/policy_contract.wasm`.
+Prerequisites: Node.js (recent LTS) and npm for the app. Rust for the contract
+test suite and for rebuilding the contract, with the `wasm32-unknown-unknown`
+target only for the rebuild. A compiled build is bundled at
+`app/assets/policy_contract.wasm`, so rebuilding is optional for running the
+app.
 
 Contract tests:
 
@@ -191,6 +242,25 @@ The verdicts are computed from your live rules, so changing the limits changes
 what each errand does. The payee allowlist has its own demonstration: the
 `simulate_spend` view call on the hosted read-only page refuses any seller not
 on the list.
+
+## Attack suite
+
+`agent/attack.mjs` is a prompt-injection suite written against the live vault.
+Each scenario pairs an injection that an attacker might slip into the agent's
+context with the request a compromised agent would make from it.
+
+| Scenario | The injection tries to | What stops it |
+| --- | --- | --- |
+| S1 exfil | pay `attacker.testnet` | the contract: payee not on the allowlist, receipt written |
+| S2 cap smash | claim the owner approved an amount above the cap | the contract: over the cap, receipt written |
+| S3 human wall | send a mid-size amount to be forwarded onward | the contract queues it, the owner refuses, the receipt ends refused |
+| S4 bypass | transfer directly from the vault | the network: the agent key cannot send a plain transfer, no state change |
+| S5 self-approve | approve its own pending spend | the network: the method is outside the key's scope, no state change |
+
+`plan` prints the predicted outcome for each scenario from the live rules and
+sends nothing. `attack` runs the suite. `verify` reads the receipts and prints
+the scoreboard. The runner predicts every outcome before sending and aborts if
+a prediction and its expectation disagree.
 
 ## Limitations
 
