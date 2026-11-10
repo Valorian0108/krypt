@@ -18,7 +18,7 @@ flow runs locally, as described in Run locally below.
 - Read-only page, no sign-in: https://krypt-three-navy.vercel.app/
 - One-minute check: `cd contract && cargo test` (45 tests).
 - Full owner flow: Run locally, then Try it, Level 2 (about 20 minutes).
-- Demo video, 2 minutes 30 seconds, covering approve and refuse:
+- Demo video:
   https://x.com/IfeTeddy0108/status/2119493630067151031
 
 The hosted page is read-only. It reads the vault and runs the contract's view
