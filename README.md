@@ -204,13 +204,14 @@ refusals, unapproved payees, exhausted budgets, expired rules, unregistered
 agents, the pending-approval queue, rule re-checks at approval time, payout
 callbacks, withdrawal destination checks, and storage headroom.
 
-Level 2: the full app on testnet. Needs a sponsor account holding testnet
-NEAR (free from a faucet; faucets are rate-limited, so topping up can take a
-while) and about 20 minutes.
+Level 2: the full app on testnet. Needs a funded sponsor account and about 20
+minutes.
 
-1. Create a NEAR testnet account and locate its key file, the JSON with a
-   `private_key` field that near-cli stores in its credentials directory.
-   Keep it outside this repository.
+1. Create a NEAR testnet account and fund it from a faucet. Faucets are rate
+   limited, so do this first. The app's defaults need 2.8 NEAR for the vault,
+   0.3 for the agent, and 0.2 for the agent's gas allowance. Then locate the
+   account's key file, the JSON with a `private_key` field that near-cli stores
+   in its credentials directory. Keep it outside this repository.
 2. Copy `app/env.example` to `app/.env`. Set `SPONSOR_ACCOUNT_ID` and
    `SPONSOR_SUBACCOUNT_SUFFIX` to that account, `SPONSOR_KEY_PATH` to the key
    file, and `INVITE_CODES` to any code you invent.
