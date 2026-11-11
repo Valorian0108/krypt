@@ -5,9 +5,22 @@ contract vault on NEAR (testnet) that enforces the owner's rules on-chain, and
 a web app lets a non-crypto owner set those rules in dollars. Sign-in is an
 email code or a passkey through NEAR FastAuth: no wallet, no seed phrase.
 
-A read-only live demo, showing one real testnet vault and the contract's own
-rule check, is hosted at https://krypt-three-navy.vercel.app/. The full owner
-flow runs locally, as described in Run locally below.
+A live, read-only view of one testnet vault is hosted at
+https://krypt-three-navy.vercel.app/. It is not the app: it reads the vault and
+asks the contract what it would do with a given amount, but it cannot sign in
+or move money. The full owner flow, including approve and pay, runs locally,
+and the video shows it.
+
+The reason is FastAuth. Sign-in works only from `http://localhost:3000`,
+because NEAR's FastAuth testnet client allows that one origin. A hosted
+deployment cannot offer it.
+
+| | Hosted page | Local app |
+| --- | --- | --- |
+| Sign in | no | yes, from `http://localhost:3000` only |
+| Read rules and receipts | yes, live from the vault | yes |
+| Ask the contract about an amount | yes | yes |
+| Set rules, approve, pay | no | yes |
 
 ## Judge quickstart
 
@@ -20,10 +33,6 @@ flow runs locally, as described in Run locally below.
 - Full owner flow: Run locally, then Try it, Level 2 (about 20 minutes).
 - Demo video:
   https://x.com/IfeTeddy0108/status/2119493630067151031
-
-The hosted page is read-only. It reads the vault and runs the contract's view
-check. Approvals, payments, and refusals are in the local app and in the
-video.
 
 ## The idea
 
