@@ -57,7 +57,10 @@ Contract (Rust)    the vault itself: holds the money, enforces the rules
 
 Each user gets their own vault account and their own agent account, created
 and funded by a sponsor. The sponsor pays creation costs and gas; its key is
-not an access key on any vault, so it cannot move a user's money.
+not an access key on any vault, so it cannot move a user's money. A leaked
+sponsor key can spend the sponsor's own balance and create subaccounts under
+the sponsor name. It cannot move money out of an existing vault: it is not a
+key on those accounts, and the rules live in each vault's contract.
 
 ## How NEAR fits
 
@@ -276,7 +279,9 @@ a prediction and its expectation disagree.
 
 - NEAR testnet only. All funds are test money.
 - Dollar figures use a fixed demo conversion rate from config, not a market
-  price.
+  price. The contract stores limits in NEAR, so a mainnet version would need
+  either a price it reads and keeps when rules are set, or a
+  stablecoin-denominated vault with no conversion. Neither is built here.
 - Invite-only with a small user cap. This is a demo deployment, not a hosted
   service.
 - Sign-in works only from `http://localhost:3000`: the FastAuth testnet
